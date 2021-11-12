@@ -1,0 +1,10 @@
+{
+  "name": "nodejs_http_server",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node --es-module-specifier-resolution=node index.js --input-type=module"
+  }
+}
