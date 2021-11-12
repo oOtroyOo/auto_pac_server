@@ -1,78 +1,28 @@
-
-import * as querystring from "querystring"
 import * as fs from "fs";
-
-function getText(response) {
-    var text = "Winnie the Witch";
-    console.log(text);
-    response.writeHead(200, { "Content-Type": "text/plain" });
-    response.write(text);
-    response.end();
-}
-
-function getImage(response) {
-    console.log("getImage");
-    fs.readFile("./images/abracadabra.jpg", "binary", function (error, file) {
-        if (error) {
-            response.writeHead(500, { "Content-Type": "text/plain" });
-            response.write(error + "\n");
-            response.end();
-        } else {
-            response.writeHead(200, { "Content-Type": "image/jpg" });
-            response.write(file, "binary");
-            response.end();
-        }
-    });
-}
-
-function getBigImage(response) {
-    console.log("getBigImage");
-    fs.readFile("./images/view.jpg", "binary", function (error, file) {
-        if (error) {
-            response.writeHead(500, { "Content-Type": "text/plain" });
-            response.write(error + "\n");
-            response.end();
-        } else {
-            response.writeHead(200, { "Content-Type": "image/jpg" });
-            response.write(file, "binary");
-            response.end();
-        }
-    });
-}
-
-export function get(query, response) {
-    console.log("query: " + query);
-    var queryObj = querystring.parse(query);
-    for (var key in queryObj) {
-        console.log("key: " + key + ", value: " + queryObj[key]);
-    }
-    var type = queryObj["type"];
-    switch (type) {
-        case "text":
-            getText(response);
-            break;
-
-        case "image":
-            getImage(response);
-            break;
-
-        case "bigimage":
-            getBigImage(response);
-            break;
-
-        default:
-            var text = "type " + type + " is unknown.";
-            console.log(text);
-            response.writeHead(200, { "Content-Type": "text/plain" });
-            response.write(text);
-            response.end();
-            break;
-    }
-}
+import * as update_pac from "../pac/update_pac";
 
 export function hello(query, response) {
     console.log("Hello World");
     response.writeHead(200, { "Content-Type": "text/plain" });
     response.write("Hello World");
+    response.end();
+}
+
+export async function pac(query, response) {
+    let date = new Date()
+    let str = date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate()
+    var target = './bin/pac_' + str + '.js';
+    var content
+    if (fs.existsSync(target)) {
+        content = fs.readFileSync(target).toString()
+    } else {
+        fs.mkdir('./bin', 777, function () { })
+        let domains = await update_pac.getDomains()
+        content = await update_pac.writeFile(domains, target);
+        console.log(`${target} 文件已更新${domains.length}个域名`);
+    }
+
+    response.writeHead(200, { "Content-Type": "text/plain" });
+    response.write(content);
     response.end();
 }

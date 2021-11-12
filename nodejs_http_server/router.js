@@ -1,11 +1,18 @@
 
-export function route(pathname, query, handle, response) {
+export async function route(pathname, query, handle, response) {
     console.log("route for " + pathname);
     if (typeof handle[pathname] === 'function') {
-        handle[pathname](query, response);
+        try {
+            await handle[pathname](query, response);
+        } catch (error) {
+            console.log("ERROR", error)
+            response.writeHead(500, { "Content-Type": "text/plain" });
+            response.write(error.message + "\n" + error.stack);
+            response.end();
+        }
     } else {
         console.log("No request handler found for " + pathname);
-        response.writeHead(404, {"Content-Type": "text/plain"});
+        response.writeHead(404, { "Content-Type": "text/plain" });
         response.write("404 not found");
         response.end();
     }

@@ -7,7 +7,5 @@
   "scripts": {
     "dev": "node --es-module-specifier-resolution=node index.js --input-type=module"
   },
-  "dependencies": {
-   
-  }
+  "dependencies": {}
 }

@@ -1,0 +1,14 @@
+﻿var PROXY = "SOCKS5 127.0.0.1:10809; SOCKS 127.0.0.1:10809; DIRECT;";
+
+var domains = [
+    $domains$
+];
+
+function FindProxyForURL(url, host) {
+    for (var i = domains.length - 1; i >= 0; i--) {
+        if (dnsDomainIs(host, domains[i])) {
+            return PROXY;
+        }
+    }
+    return "DIRECT";
+}
