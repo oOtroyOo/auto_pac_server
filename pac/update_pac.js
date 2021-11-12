@@ -8,13 +8,6 @@ import * as fs from 'fs';
 
 const GFWLIST_PATH = "https://cdn.jsdelivr.net/gh/gfwlist/gfwlist@master/gfwlist.txt";
 
-// 扩展域名，添加额外需要代理的域名
-const extendDomains = [
-  'githubusercontent.com',
-  'stackoverflow.com',
-  'cloudfront.net',
-  'akamaihd.net'
-];
 
 /**
  * https GET 请求
@@ -43,7 +36,7 @@ export async function getDomains() {
   const ruleData = Buffer.from(compactData, 'base64').toString();
   const ruleList = ruleData.split('\n');
 
-  const domains = [].concat(extendDomains);
+  const domains = [];
   for (const rule of ruleList) {
     if (rule.startsWith('.')) {
       domains.push(rule.slice(1));

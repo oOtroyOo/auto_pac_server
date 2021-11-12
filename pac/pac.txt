@@ -1,7 +1,12 @@
-﻿var PROXY = "SOCKS5 127.0.0.1:10809; SOCKS 127.0.0.1:10809; DIRECT;";
+var PROXY = "SOCKS5 127.0.0.1:10809; SOCKS 127.0.0.1:10809; DIRECT;";
 
 var domains = [
-    $domains$
+    $domains$,
+    'community.akamai.steamstatic.com',
+    'githubusercontent.com',
+    'stackoverflow.com',
+    'cloudfront.net',
+    'akamaihd.net'
 ];
 
 function FindProxyForURL(url, host) {
