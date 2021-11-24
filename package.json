@@ -18,7 +18,6 @@
   },
   "devDependencies": {
     "pkg": "*",
-    "esbuild": "*",
-    "npx": "*"
+    "esbuild": "*"
   }
 }
