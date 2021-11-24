@@ -1,5 +1,5 @@
 import * as fs from "fs";
-import * as update_pac from "../pac/update_pac";
+import * as update_pac from "../../pac/update_pac.js";
 
 export function hello(query, response) {
     console.log("Hello World");

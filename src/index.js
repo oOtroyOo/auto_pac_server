@@ -1,6 +1,6 @@
-import * as server from "./nodejs_http_server/server"
-import * as router from "./nodejs_http_server/router"
-import * as requestHandlers from "./nodejs_http_server/requestHandlers"
+import * as server from "./nodejs_http_server/server.js"
+import * as router from "./nodejs_http_server/router.js"
+import * as requestHandlers from "./nodejs_http_server/requestHandlers.js"
 
 let handle = {}
 handle["/"] = requestHandlers.hello;
