@@ -4,8 +4,21 @@
   "description": "",
   "type": "module",
   "main": "index.js",
-  "scripts": {    
+  "pkg": {
+    "options": [
+      "experimental-modules"
+    ]
+  },
+  "scripts": {
+    "build-clean": "",
+    "build-esbuild": "esbuild ./src --outfile=./dist/index.js --bundle --platform=node",
+    "build-pkg": "pkg --targets=node16-win-x64 --output=dist/auto-pac.exe --options experimental-modules dist/index.js",
+    "build": "rd /s /q dist 2>nul &npm run build-esbuild &&npm run build-pkg &&xcopy pac dist\\pac\\ &del dist\\index.js",
     "dev": "node --es-module-specifier-resolution=node src/index.js --input-type=module"
   },
-  "dependencies": {}
+  "devDependencies": {
+    "pkg": "*",
+    "esbuild": "*",
+    "npx": "*"
+  }
 }
