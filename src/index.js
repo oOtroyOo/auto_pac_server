@@ -1,4 +1,4 @@
-import * as server from "./nodejs_http_server/server.js"
+import Server from "./nodejs_http_server/server.js"
 import * as router from "./nodejs_http_server/router.js"
 import * as requestHandlers from "./nodejs_http_server/requestHandlers.js"
 
@@ -7,5 +7,10 @@ handle["/"] = requestHandlers.hello;
 Object.keys(requestHandlers).forEach(function (key) {
     handle['/' + key] = requestHandlers[key];
 })
-
-server.start(router.route, handle);
+let s = new Server();
+try {
+    s.start(router.route, handle);
+} catch (error) {
+    console.log(error);
+    setTimeout(function () { }, 65535);
+}

@@ -1,4 +1,4 @@
-var PROXY = "SOCKS5 127.0.0.1:10809; SOCKS 127.0.0.1:10809; DIRECT;";
+var PROXY = "SOCKS5 $serverIp$:$serverPort$; SOCKS $serverIp$:$serverPort$; DIRECT;";
 
 var domains = [
     $domains$,
