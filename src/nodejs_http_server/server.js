@@ -37,7 +37,7 @@ export default class Server {
         }
         if (Server.serverIp == null)
             Server.serverIp = this.getIPAdress();
-        http.createServer(onRequest).listen(this.port);
+        http.createServer(onRequest).listen(Server.port);
         console.log("Server has started. http://" + Server.serverIp + ":" + Server.port);
     }
 }
