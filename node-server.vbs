@@ -1,1 +1,2 @@
-CreateObject("Wscript.Shell").Run "node.exe --es-module-specifier-resolution=node index.js --input-type=module", 0
+Set WshShell=Wscript.CreateObject("Wscript.Shell")
+WshShell.Run "run.bat", 0
