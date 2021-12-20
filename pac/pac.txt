@@ -1,4 +1,4 @@
-var PROXY = "SOCKS5 $serverIp$:$serverPort$; SOCKS $serverIp$:$serverPort$; DIRECT;";
+var PROXY = "SOCKS5 $serverIp$:10809; SOCKS $serverIp$:10809; DIRECT;";
 
 var domains = [
     $domains$,
@@ -16,4 +16,4 @@ function FindProxyForURL(url, host) {
         }
     }
     return "DIRECT";
-}
+}ss

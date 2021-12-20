@@ -24,7 +24,7 @@ export async function pac(query, response) {
     } else {
         fs.mkdir('./bin', 777, function () { })
         let domains = await update_pac.getDomains()
-        content = await update_pac.writeFile(domains, target, ip, Server.port);
+        content = await update_pac.writeFile(domains, target, ip);
         console.log(`${target} 文件已更新${domains.length}个域名`);
     }
 
