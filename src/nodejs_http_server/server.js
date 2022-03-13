@@ -8,6 +8,7 @@ export default class Server {
 
     }
     getIPAdress() {
+    return "0.0.0.0"
         var interfaces = os.networkInterfaces();
         for (var devName in interfaces) {
             var iface = interfaces[devName];
@@ -27,13 +28,17 @@ export default class Server {
     }
 
     start(route, handle) {
+        /**
+    @param {http.IncomingHttpHeaders} request 
+    @param {http.ServerResponse} response 
+    */
         function onRequest(request, response) {
             var urlObj = url.parse(request.url);
             var pathname = urlObj.pathname;
             var query = urlObj.query;
             console.log("Request for " + pathname + " received." + " query: " + query);
 
-            route(pathname, query, handle, response);
+            route(pathname, request, handle, response);
         }
         if (Server.serverIp == null)
             Server.serverIp = this.getIPAdress();

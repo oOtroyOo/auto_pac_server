@@ -56,11 +56,13 @@ export async function getDomains() {
  * 写入 pac.js
  * @param {string[]} domains
  * @param {string} target pac.js 文件路径
+ * @param {string} host 
  */
-export async function writeFile(domains, target, serverIp) {
+export async function writeFile(domains, target, host) {
   const pac = fs.readFileSync('pac/pac.txt').toString()
-  var content = pac.replaceAll("$domains$", domains.map(d => `"${d}"`).join(','))
-  content = content.replaceAll("$serverIp$", serverIp)
+  var content = pac.toString()
+  content = content.replaceAll("$host$", host,)
+  content = content.replace("$domains$", domains.map(d => `"${d}"`).join(','))
   fs.writeFileSync(target, content, 'utf8');
   return content
 }

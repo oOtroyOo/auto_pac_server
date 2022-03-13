@@ -10,21 +10,27 @@ export function hello(query, response) {
 }
 const ipTest = new RegExp("\\d+\\.\\d+\\.\\d+\\.\\d+")
 
-export async function pac(query, response) {
+export async function pac(request, response) {
+    /** @type string */
+    var host = request.headers["host"]
+    if (host != undefined && host != '') {
+        var indexOf = host.indexOf(':')
+        if (indexOf > 0) {
+            host = host.substring(0, indexOf)
+        }
+    } else {
+        host = '127.0.0.1'
+    }
     let date = new Date()
     let str = date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate()
+    var target = './bin/pac_' + host + '_' + str + '.js';
     var content
-    var ip = query
-    if (ip == null || !ipTest.exec(ip)) {
-        ip = Server.serverIp
-    }
-    var target = './bin/pac_' + ip + '_' + str + '.js';
     if (fs.existsSync(target)) {
         content = fs.readFileSync(target).toString()
     } else {
         fs.mkdir('./bin', 777, function () { })
         let domains = await update_pac.getDomains()
-        content = await update_pac.writeFile(domains, target, ip);
+        content = await update_pac.writeFile(domains, target, host);
         console.log(`${target} 文件已更新${domains.length}个域名`);
     }
 

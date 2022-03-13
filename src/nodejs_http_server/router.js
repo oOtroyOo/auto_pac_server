@@ -1,9 +1,9 @@
 
-export async function route(pathname, query, handle, response) {
+export async function route(pathname, request, handle, response) {
     console.log("route for " + pathname);
     if (typeof handle[pathname] === 'function') {
         try {
-            await handle[pathname](query, response);
+            await handle[pathname](request, response);
         } catch (error) {
             console.log("ERROR", error)
             response.writeHead(500, { "Content-Type": "text/plain" });
