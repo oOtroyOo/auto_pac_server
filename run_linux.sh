@@ -1,2 +1,2 @@
-cd /var/services/homes/syadmin/nodejs_server
-node --es-module-specifier-resolution=node index.js --input-type=module
+cd `dirname $0`
+node --es-module-specifier-resolution=node src/index.js --input-type=module
