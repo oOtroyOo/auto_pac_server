@@ -59,7 +59,7 @@ export async function getDomains() {
  * @param {string} host 
  */
 export async function writeFile(domains, target, host) {
-  const pac = fs.readFileSync('pac/pac.txt').toString()
+  const pac = fs.readFileSync('pac/pac.js').toString()
   var content = pac.toString()
   content = content.replace(/\$host\$/g, host,)
   content = content.replace("$domains$", domains.map(d => `"${d}"`).join(','))
