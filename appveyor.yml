@@ -16,5 +16,5 @@ test_script:
 build: off
 artifacts:
   - path: dist
-    name: dist.zip
+    name: auto_pac
     type: zip
