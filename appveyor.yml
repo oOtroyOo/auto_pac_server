@@ -14,3 +14,7 @@ test_script:
   # run tests
   - npm run build
 build: off
+artifacts:
+  - path: dist
+    name: dist.zip
+    type: zip
