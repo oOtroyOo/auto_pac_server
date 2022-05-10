@@ -10,7 +10,7 @@
 
 ## 运行方式
 
-1. 下载运行软件 <img src="https://ci.appveyor.com/project/oOtroyOo/auto_pac_server/branch/master?svg=true" alt="Project Badge" width="300"> auto-pac.exe
+1. 下载运行软件 [![Build status](https://ci.appveyor.com/api/projects/status/vm7a0xamm0t7manv?svg=true)](https://ci.appveyor.com/project/oOtroyOo/auto-pac-server) auto-pac.exe
 2. 安装 nodejs 运行命令如下 
 
     `node.exe --es-module-specifier-resolution=node index.js --input-type=module`
