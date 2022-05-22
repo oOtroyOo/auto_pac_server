@@ -6,7 +6,12 @@ import * as https from 'https';
 import * as path from 'path';
 import * as fs from 'fs';
 
-const GFWLIST_PATH = "https://cdn.jsdelivr.net/gh/gfwlist/gfwlist@master/gfwlist.txt";
+const GFWLIST_PATH = [
+  "https://raw.githubusercontent.com/gfwlist/gfwlist/master/gfwlist.txt",
+  "https://cdn.jsdelivr.net/gh/gfwlist/gfwlist@master/gfwlist.txt",
+  "https://bitbucket.org/gfwlist/gfwlist/raw/HEAD/gfwlist.txt",
+  "https://gitlab.com/gfwlist/gfwlist/raw/master/gfwlist.txt"
+];
 
 
 /**
@@ -16,7 +21,7 @@ const GFWLIST_PATH = "https://cdn.jsdelivr.net/gh/gfwlist/gfwlist@master/gfwlist
  */
 function httpsGet(path) {
   return new Promise((resolve, reject) => {
-    const req = https.get(path, { timeout: 30 * 1000 });
+    const req = https.get(path, { timeout: 10 * 1000 });
     req.on('response', res => {
       if (res.statusCode < 200 || res.statusCode >= 300) {
         return reject(new Error('statusCode=' + res.statusCode));
@@ -31,7 +36,21 @@ function httpsGet(path) {
 
 // 获取域名
 export async function getDomains() {
-  const rawData = await httpsGet(GFWLIST_PATH);
+  var rawData = null;
+  var error = null;
+  for (let index = 0; index < GFWLIST_PATH.length; index++) {
+    try {
+      var url = GFWLIST_PATH[index]
+      console.log("Get: " + url)
+      rawData = await httpsGet(url);
+    } catch (e) {
+      error = e
+    }
+  }
+  if (rawData == null) {
+    throw error
+  }
+
   const compactData = rawData.replace('/\n/g', '');
   const ruleData = Buffer.from(compactData, 'base64').toString();
   const ruleList = ruleData.split('\n');

@@ -5,6 +5,7 @@ export async function route(pathname, request, handle, response) {
         try {
             await handle[pathname](request, response);
         } catch (error) {
+            
             console.log("ERROR", error)
             response.writeHead(500, { "Content-Type": "text/plain" });
             response.write(error.message + "\n" + error.stack);
