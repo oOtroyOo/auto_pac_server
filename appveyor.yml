@@ -21,20 +21,14 @@ artifacts:
     
 environment:
   access_token:
-    secure: FRSCEjosDbpSEz4zOESBW+HsNXZ3XmmH4jEvgZ/AMZQlyCSXlpXKFObdPg6Y9aHi
-    
-on_success:
-  - git config --global credential.helper store
-  - ps: Set-Content -Path "$HOME\.git-credentials" -Value "https://$($env:access_token):x-oauth-basic@github.com`n" -NoNewline
-  - git tag $(APPVEYOR_BUILD_VERSION)
-  - git push origin --tags
+    secure: FRSCEjosDbpSEz4zOESBW+HsNXZ3XmmH4jEvgZ/AMZQlyCSXlpXKFObdPg6Y9aHi    
 
 deploy:
   release: v$(APPVEYOR_BUILD_VERSION)
   description: 'Release'
   provider: GitHub
   auth_token:
-    secure: FRSCEjosDbpSEz4zOESBW+HsNXZ3XmmH4jEvgZ/AMZQlyCSXlpXKFObdPg6Y9aHi # your encrypted token from GitHub
+    secure: FRSCEjosDbpSEz4zOESBW+HsNXZ3XmmH4jEvgZ/AMZQlyCSXlpXKFObdPg6Y9aHi # your encrypted token from GitHub. appveyor Accoun设置中添加Encrypt YAML 隐藏真实key
   artifact: /.*\.zip/            # upload all NuGet packages to release assets
   draft: false
   prerelease: false
