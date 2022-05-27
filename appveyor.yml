@@ -19,9 +19,13 @@ artifacts:
     name: auto_pac
     type: zip
     
+environment:
+  access_token:
+    secure: zYCOwcOlgTzvbD0CjJRDNQ==
+    
 on_success:
   - git config --global credential.helper store
-  - ps: Set-Content -Path "$HOME\.git-credentials" -Value "https://$(APPVEYOR_BUILD_VERSION):x-oauth-basic@github.com`n" -NoNewline
+  - ps: Set-Content -Path "$HOME\.git-credentials" -Value "https://$($env:access_token):x-oauth-basic@github.com`n" -NoNewline
   - git tag $(APPVEYOR_BUILD_VERSION)
   - git push origin --tags
 
@@ -30,7 +34,7 @@ deploy:
   description: 'Release'
   provider: GitHub
   auth_token:
-    secure: $(GITHUB_SECURE) # your encrypted token from GitHub
+    secure: zYCOwcOlgTzvbD0CjJRDNQ== # your encrypted token from GitHub
   artifact: /.*\.zip/            # upload all NuGet packages to release assets
   draft: false
   prerelease: false
