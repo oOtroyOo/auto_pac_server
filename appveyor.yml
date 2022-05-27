@@ -21,7 +21,7 @@ artifacts:
     
 environment:
   access_token:
-    secure: zYCOwcOlgTzvbD0CjJRDNQ==
+    secure: FRSCEjosDbpSEz4zOESBW+HsNXZ3XmmH4jEvgZ/AMZQlyCSXlpXKFObdPg6Y9aHi
     
 on_success:
   - git config --global credential.helper store
@@ -34,7 +34,7 @@ deploy:
   description: 'Release'
   provider: GitHub
   auth_token:
-    secure: zYCOwcOlgTzvbD0CjJRDNQ== # your encrypted token from GitHub
+    secure: FRSCEjosDbpSEz4zOESBW+HsNXZ3XmmH4jEvgZ/AMZQlyCSXlpXKFObdPg6Y9aHi # your encrypted token from GitHub
   artifact: /.*\.zip/            # upload all NuGet packages to release assets
   draft: false
   prerelease: false
