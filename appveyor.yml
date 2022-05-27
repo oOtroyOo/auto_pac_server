@@ -27,6 +27,8 @@ deploy:
   release: v$(APPVEYOR_BUILD_VERSION)
   description: 'Release'
   provider: GitHub
+  auth_token:
+    secure: $(GITHUB_SECURE) # your encrypted token from GitHub
   artifact: /.*\.zip/            # upload all NuGet packages to release assets
   draft: false
   prerelease: false
