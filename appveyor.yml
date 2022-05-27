@@ -20,6 +20,8 @@ artifacts:
     type: zip
     
 on_success:
+  - git config --global credential.helper store
+  - ps: Set-Content -Path "$HOME\.git-credentials" -Value "https://$(APPVEYOR_BUILD_VERSION):x-oauth-basic@github.com`n" -NoNewline
   - git tag $(APPVEYOR_BUILD_VERSION)
   - git push origin --tags
 
