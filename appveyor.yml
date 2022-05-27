@@ -1,3 +1,4 @@
+skip_tags: true
 
 # Install scripts. (runs after repo cloning)
 install:
@@ -5,7 +6,7 @@ install:
   - ps: Install-Product node
   # install modules
   - npm install
-
+  
 # Post-install test scripts.
 test_script:
   # Output useful info for debugging.
