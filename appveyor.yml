@@ -18,3 +18,7 @@ artifacts:
   - path: dist
     name: auto_pac
     type: zip
+    
+on_success:
+  - git tag $(APPVEYOR_BUILD_VERSION)
+  - git push origin --tags
