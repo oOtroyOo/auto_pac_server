@@ -10,7 +10,7 @@
 
 ## 运行方式
 
-1. 下载运行软件 exe [![Build status](https://ci.appveyor.com/api/projects/status/vm7a0xamm0t7manv?svg=true&retina=true)](https://ci.appveyor.com/project/oOtroyOo/auto-pac-server) [![GitHub release (latest by date)](https://img.shields.io/github/v/release/oOtroyOo/auto_pac_server)](https://github.com/oOtroyOo/auto-pac-server/releases/latest)
+1. 下载运行软件 exe [![Build status](https://ci.appveyor.com/api/projects/status/vm7a0xamm0t7manv?svg=true&retina=true)](https://ci.appveyor.com/project/oOtroyOo/auto-pac-server) [![GitHub release (latest by date)](https://img.shields.io/github/v/release/oOtroyOo/auto_pac_server)](https://github.com/oOtroyOo/auto_pac_server/releases/latest)
 2. 安装 nodejs 运行命令如下 
 
     `node.exe --es-module-specifier-resolution=node index.js --input-type=module`
