@@ -1,5 +1,6 @@
 import fs from "fs";
-import * as update_pac from "../update_pac.js";
+import _update_pac from "../update_pac.js";
+const update_pac = new _update_pac()
 import Server from "./server.js"
 
 export function hello(query, response) {
@@ -10,6 +11,7 @@ export function hello(query, response) {
 }
 const ipTest = new RegExp("\\d+\\.\\d+\\.\\d+\\.\\d+")
 
+var pachandle = {};
 export async function pac(request, response) {
     /** @type string */
     var host = request.headers["host"]
@@ -36,19 +38,22 @@ export async function pac(request, response) {
             stat.mtime.getDate() === date.getDate();
         content = fs.readFileSync(target).toString()
     }
-    if (true || content == null || !isToday) {
-        fs.mkdir('./bin', 777, function () { })
+    if (content == null || !isToday) {
         try {
-            let domains = await update_pac.getDomains()
-            content = await update_pac.writeFile(domains, target, host);
-            console.log(`${target} 文件已更新${domains.length}个域名`);
+            if (pachandle[host] == null) {
+                console.log("new handle")
+                pachandle[host] = update_pac.process(target, host)
+            }
+            content = await pachandle[host];
+
         } catch (error) {
             console.log("ERROR", error)
             if (content == null) {
                 throw error
             }
+        } finally {
+            pachandle[host] = null
         }
-
     }
 
     response.writeHead(200, { "Content-Type": "text/plain" });
