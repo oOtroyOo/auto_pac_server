@@ -36,13 +36,17 @@ export default class update_pac {
   async _httpsGet(path) {
     // 5 second timeout:
     var controller = new AbortController()
-    console.log("Get: " + path)
+    console.log("Send: " + path)
 
     var timeoutId = setTimeout(() => controller.abort(), 5000)
     /** @type {RequestInit} */
     var initOption = {}
     initOption.signal = controller.signal
     return await fetch(path, initOption).then(response => {
+      console.log("Get: " + path)
+      if (response.status < 200 || response.status >= 300) {
+        throw (new Error('statusCode=' + response.status + " :" + response.statusText));
+      }
       return response.text()
     })
 
@@ -68,16 +72,10 @@ export default class update_pac {
 
   // 获取域名
   async _getDomains() {
-    var rawData = null;
     var error = null;
-    var promiseList = []
-    for (let index = 0; index < GFWLIST_PATH.length; index++) {
-      var url = GFWLIST_PATH[index]
-      promiseList.push(this._httpsGet(url))
-    }
+    var promiseList = GFWLIST_PATH.map(url => this._httpsGet(url));
 
-    await Promise.any(promiseList)
-      .then((result) => rawData = result)
+    var rawData = await Promise.any(promiseList)
       .catch(e => error = e)
 
     if (rawData == null || error != null) {
