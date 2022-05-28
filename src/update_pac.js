@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-
+import fetch from 'node-fetch';
 'use strict';
 
 import * as https from 'https';
@@ -33,40 +33,62 @@ export default class update_pac {
    * @param {string} path File path
    * @returns {Promise<string>}
    */
-  _httpsGet(path) {
-    return new Promise((resolve, reject) => {
-      /**@type {https.RequestOptions} */
-      var options = {}
-      options.timeout = 3;
-      options.sessionTimeout = 3;
-      const req = https.get(path, options);
-      req.on('response', res => {
-        if (res.statusCode < 200 || res.statusCode >= 300) {
-          return reject(new Error('statusCode=' + res.statusCode));
-        }
-        const chunks = [];
-        res.on('data', chunk => chunks.push(chunk));
-        res.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
-      });
-      req.on('error', err => reject(err));
-    });
+  async _httpsGet(path) {
+    // 5 second timeout:
+    var controller = new AbortController()
+    console.log("Get: " + path)
+
+    var timeoutId = setTimeout(() => controller.abort(), 5000)
+    /** @type {RequestInit} */
+    var initOption = {}
+    initOption.signal = controller.signal
+    return await fetch(path, initOption).then(response => {
+      return response.text()
+    })
+
+    // Promise封装异步
+    // return new Promise((resolve, reject) => {
+    //   /**@type {https.RequestOptions} */
+    //   var options = {}
+    //   options.timeout = 3;
+    //   options.sessionTimeout = 3;
+    //   const req = https.get(path, options);
+    //   req.on('response', res => {
+    //     if (res.statusCode < 200 || res.statusCode >= 300) {
+    //       return reject(new Error('statusCode=' + res.statusCode));
+    //     }
+    //     const chunks = [];
+    //     res.on('data', chunk => chunks.push(chunk));
+    //     res.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
+    //   });
+    //   req.on('error', err => reject(err));
+    // });
+
   }
 
   // 获取域名
   async _getDomains() {
     var rawData = null;
     var error = null;
+    var promiseList = []
     for (let index = 0; index < GFWLIST_PATH.length; index++) {
-      try {
-        var url = GFWLIST_PATH[index]
-        console.log("Get: " + url)
-        rawData = await this._httpsGet(url);
-      } catch (e) {
-        error = e
-      }
+      var url = GFWLIST_PATH[index]
+      promiseList.push(this._httpsGet(url))
     }
-    if (rawData == null) {
-      throw error
+
+    await Promise.any(promiseList)
+      .then((result) => rawData = result)
+      .catch(e => error = e)
+
+    if (rawData == null || error != null) {
+      if (error != null) {
+        if (error.errors != null && error.errors.length > 0) {
+          throw error.errors[error.errors.length - 1]
+        }
+        throw error
+      } else {
+        throw rawData
+      }
     }
 
     const compactData = rawData.replace('/\n/g', '');
@@ -90,7 +112,7 @@ export default class update_pac {
   }
 
   /**
-   * 写入 pac.js
+   * 写入 pac.js 
    * @param {string[]} domains
    * @param {string} target pac.js 文件路径
    * @param {string} host 
