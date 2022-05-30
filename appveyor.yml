@@ -14,7 +14,19 @@ test_script:
   - npm --version
   # run tests
   - npm run build
+
 build: off
+skip_commits:
+  files:
+    - '**/*.md'    
+    - '**/*.bat'   
+    - '**/*.md'
+    - '**/*.sh'
+    - '**/*.vbs'
+    - '.gitignore'
+    - 'pac/pac.js'
+    - '**/.vscode'
+    
 artifacts:
   - path: dist
     name: auto_pac
