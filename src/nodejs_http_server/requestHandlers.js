@@ -75,6 +75,7 @@ export async function pac(request, response) {
 */
 export async function wakeup(request, response) {
     let mac = "00-D8-61-75-6A-6A"
+    let bradcast = "192.168.255.255"
     if (request.url.indexOf('?') > 0) {
         mac = request.url.substring(request.url.indexOf('?') + 1)
     }
@@ -82,17 +83,22 @@ export async function wakeup(request, response) {
 
     let result = ""
     let done = false;
-
+    let parseMAC = Wakeup.parseMAC(mac)
+    console.log("MAC:" + mac + " " + parseMAC);
     let code = 200
     try {
         /**@type {Socket}    */
-        let socket = Wakeup.sendWOL(Wakeup.parseMAC(mac), (error) => {
-            done = true
-            result += error
-            if (error && error != "") {
-                code = 500
-            }
-        })
+        let socket = Wakeup.sendWOL(parseMAC,
+            {
+                address: bradcast
+            },
+            (error) => {
+                done = true
+                result += error
+                if (error && error != "") {
+                    code = 500
+                }
+            })
     } catch (error) {
         done = true
         code = 500
