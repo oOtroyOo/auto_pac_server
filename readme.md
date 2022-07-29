@@ -37,7 +37,8 @@
 
 ## 网络唤醒
 
-`http://127.0.0.1:10888/wakeup?XX-XX-XX-XX-XX-XX`
+http://127.0.0.1:10888/wakeup?XX-XX-XX-XX-XX-XX
+
 唤醒局域网中Mac地址的电脑
 
 ## Developer
