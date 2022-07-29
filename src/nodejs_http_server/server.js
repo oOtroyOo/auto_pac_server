@@ -29,7 +29,7 @@ export default class Server {
 
     start(route, handle) {
         /**
-    @param {http.IncomingHttpHeaders} request 
+    @param {http.IncomingMessage} request 
     @param {http.ServerResponse} response 
     */
         function onRequest(request, response) {

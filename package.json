@@ -17,7 +17,10 @@
     "dev": "node --es-module-specifier-resolution=node src/index.js --input-type=module"
   },
   "devDependencies": {
-    "pkg": "*",
-    "esbuild": "*"
+    "esbuild": "*",
+    "pkg": "*"
+  },
+  "dependencies": {
+    "wakeup": "*"
   }
 }
