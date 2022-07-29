@@ -75,7 +75,7 @@ export async function pac(request, response) {
 */
 export async function wakeup(request, response) {
     let mac = "00-D8-61-75-6A-6A"
-    let bradcast = "192.168.255.255"
+    let bradcast = "192.168.2.255"
     if (request.url.indexOf('?') > 0) {
         mac = request.url.substring(request.url.indexOf('?') + 1)
     }
