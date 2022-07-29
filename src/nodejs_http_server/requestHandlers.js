@@ -80,13 +80,25 @@ export async function wakeup(request, response) {
     }
     mac = mac.replaceAll("-", ":")
 
-    let content = mac
+    let result = ""
     let done = false;
-    /**@type {Socket}    */
-    let socket = Wakeup.sendWOL(Wakeup.parseMAC(mac), (error) => {
+
+    let code = 200
+    try {
+        /**@type {Socket}    */
+        let socket = Wakeup.sendWOL(Wakeup.parseMAC(mac), (error) => {
+            done = true
+            result += error
+            if (error && error != "") {
+                code = 500
+            }
+        })
+    } catch (error) {
         done = true
-        content += "\n" + error
-    })
+        code = 500
+        result += error
+    }
+
     await new Promise(function (resolve, reject) {
         (function waitForFoo() {
             if (done) return resolve();
@@ -94,7 +106,7 @@ export async function wakeup(request, response) {
         })();
     });
 
-    response.writeHead(200, { "Content-Type": "text/plain" });
-    response.write(content);
+    response.writeHead(code, { "Content-Type": "text/plain" });
+    response.write(result);
     response.end();
 }
