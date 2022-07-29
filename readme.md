@@ -34,3 +34,12 @@
 ## 缓存
 
 每天会在bin目录下刷新一次pac文件做缓存，自行决定是否要删除
+
+## 网络唤醒
+
+`http://127.0.0.1:10888/wakeup?XX-XX-XX-XX-XX-XX`
+唤醒局域网中Mac地址的电脑
+
+## Developer
+
+Build 时，执行文件例如 fetched-v**.**.*-win-x64  下载缓慢的话，前往 [pkg下载](https://github.com/vercel/pkg-fetch/releases)，直接改名成`fetched-v**.**.*-win-x64`文件复制到 `C:\Users\[用户]\.pkg-cache\v3.3`

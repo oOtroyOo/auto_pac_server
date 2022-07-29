@@ -1,7 +1,10 @@
 import fs from "fs";
+import http from "http"
 import _update_pac from "../update_pac.js";
+import Wakeup from "wakeup";
 const update_pac = new _update_pac()
 import Server from "./server.js"
+import { Socket } from "dgram";
 
 export function hello(query, response) {
     console.log("Hello World");
@@ -12,6 +15,10 @@ export function hello(query, response) {
 const ipTest = new RegExp("\\d+\\.\\d+\\.\\d+\\.\\d+")
 
 var pachandle = {};
+/**
+@param {http.IncomingMessage} request 
+@param {http.ServerResponse} response 
+*/
 export async function pac(request, response) {
     /** @type string */
     var host = request.headers["host"]
@@ -55,6 +62,37 @@ export async function pac(request, response) {
             pachandle[host] = null
         }
     }
+
+    response.writeHead(200, { "Content-Type": "text/plain" });
+    response.write(content);
+    response.end();
+}
+
+
+/**
+@param {http.IncomingMessage} request 
+@param {http.ServerResponse} response 
+*/
+export async function wakeup(request, response) {
+    let mac = "00-D8-61-75-6A-6A"
+    if (request.url.indexOf('?') > 0) {
+        mac = request.url.substring(request.url.indexOf('?') + 1)
+    }
+    mac = mac.replaceAll("-", ":")
+
+    let content = mac
+    let done = false;
+    /**@type {Socket}    */
+    let socket = Wakeup.sendWOL(Wakeup.parseMAC(mac), (error) => {
+        done = true
+        content += "\n" + error
+    })
+    await new Promise(function (resolve, reject) {
+        (function waitForFoo() {
+            if (done) return resolve();
+            setTimeout(waitForFoo, 30);
+        })();
+    });
 
     response.writeHead(200, { "Content-Type": "text/plain" });
     response.write(content);

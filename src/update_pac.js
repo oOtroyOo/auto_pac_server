@@ -9,7 +9,7 @@ import * as fs from 'fs';
 const GFWLIST_PATH = [
   "https://raw.githubusercontent.com/gfwlist/gfwlist/master/gfwlist.txt",
   "https://cdn.staticaly.com/gh/gfwlist/gfwlist/master/gfwlist.txt",
-  "https://cdn.jsdelivr.net/gh/gfwlist/gfwlist@master/gfwlist.txt",
+  "https://cdn.jsdelivr.net/gh/gfwlist/gfwlist/gfwlist.txt",
   "https://bitbucket.org/gfwlist/gfwlist/raw/HEAD/gfwlist.txt",
   "https://gitlab.com/gfwlist/gfwlist/raw/master/gfwlist.txt"
 ];
