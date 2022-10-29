@@ -1,2 +1,2 @@
 cd `dirname $0`
-node --es-module-specifier-resolution=node src/index.js --input-type=module
+node --es-module-specifier-resolution=node src/index.js --input-type=module --port=8880

@@ -4,7 +4,7 @@ import _update_pac from "../update_pac.js";
 import Wakeup from "wakeup";
 const update_pac = new _update_pac()
 import Server from "./server.js"
-import { Socket } from "dgram";
+import Socket from "dgram";
 
 export function hello(query, response) {
     console.log("Hello World");
@@ -74,7 +74,7 @@ export async function pac(request, response) {
 @param {http.ServerResponse} response 
 */
 export async function wakeup(request, response) {
-    let mac = "00-D8-61-75-6A-6A"
+    let mac = "70-85-C2-CB-E4-B2"
     let bradcast = "192.168.2.255"
     if (request.url.indexOf('?') > 0) {
         mac = request.url.substring(request.url.indexOf('?') + 1)

@@ -7,6 +7,18 @@ handle["/"] = requestHandlers.hello;
 Object.keys(requestHandlers).forEach(function (key) {
     handle['/' + key] = requestHandlers[key];
 })
+
+process.argv.forEach((val, index) => {
+    console.log(`${index}: ${val}`);
+    if (val.startsWith("--port")) {
+        var split = val.indexOf('=')
+        if (split > 0) {
+            var port = parseInt(val.substring(split + 1))
+            Server.port = port
+        }
+    }
+});
+
 let s = new Server();
 try {
     s.start(router.route, handle);
