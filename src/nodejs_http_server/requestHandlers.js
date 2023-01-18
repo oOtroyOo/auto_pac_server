@@ -5,6 +5,7 @@ import Wakeup from "wakeup";
 const update_pac = new _update_pac()
 import Server from "./server.js"
 import Socket from "dgram";
+import mime from "mime-types";
 import FileServer from "file-server";
 
 export function hello(query, response) {
@@ -133,8 +134,9 @@ const fileServer = new FileServer((error, request, response) => {
 export async function file(request, response) {
     let filePath = request.url.substring("/file/".length)
     filePath = decodeURI(filePath)
+
     try {
-        fileServer.serveFile(filePath)(request, response)
+        fileServer.serveFile(filePath, mime.lookup(filePath))(request, response)
     } catch (error) {
         throw error
     }

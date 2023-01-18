@@ -21,6 +21,7 @@
     "pkg": "*"
   },
   "dependencies": {
+    "mime-types": "*",
     "file-server": "*",
     "wakeup": "*"
   }
