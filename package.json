@@ -13,7 +13,7 @@
     "build-clean": "",
     "build-esbuild": "esbuild ./src --outfile=./dist/index.js --bundle --platform=node",
     "build-pkg": "pkg --targets=node16-win-x64 --output=dist/auto-pac.exe --options experimental-modules dist/index.js",
-    "build": "rd /s /q dist 2>nul &npm run build-esbuild &&npm run build-pkg &&xcopy pac dist\\pac\\ &del dist\\index.js",
+    "build": "rd /s /q dist 2>nul &npm run build-esbuild &&npm run build-pkg &&xcopy res dist\\res\\ &del dist\\index.js",
     "dev": "node --es-module-specifier-resolution=node src/index.js --input-type=module --port=8880"
   },
   "devDependencies": {
@@ -21,6 +21,7 @@
     "pkg": "*"
   },
   "dependencies": {
+    "file-server": "*",
     "wakeup": "*"
   }
 }

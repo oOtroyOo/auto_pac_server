@@ -1,11 +1,25 @@
 
+/**
+ * 
+ * @param {string} pathname 
+ * @param {http.IncomingMessage} request 
+ * @param {http.ServerResponse} response 
+ * @param {Map<string,function(http.IncomingMessage,http.ServerResponse)>} handle 
+ */
 export async function route(pathname, request, handle, response) {
     console.log("route for " + pathname);
-    if (typeof handle[pathname] === 'function') {
+    let handleName = pathname
+
+    let index = pathname.indexOf("/", 1)
+    if (index > -1) {
+        handleName = pathname.substring(0, index);
+    }
+
+    if (handle[handleName]!=null && typeof handle[handleName] === 'function') {
         try {
-            await handle[pathname](request, response);
+            await handle[handleName](request, response);
         } catch (error) {
-            
+
             console.log("ERROR", error)
             response.writeHead(500, { "Content-Type": "text/plain" });
             response.write(error.message + "\n" + error.stack);

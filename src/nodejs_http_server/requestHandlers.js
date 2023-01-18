@@ -5,6 +5,7 @@ import Wakeup from "wakeup";
 const update_pac = new _update_pac()
 import Server from "./server.js"
 import Socket from "dgram";
+import FileServer from "file-server";
 
 export function hello(query, response) {
     console.log("Hello World");
@@ -115,4 +116,25 @@ export async function wakeup(request, response) {
     response.writeHead(code, { "Content-Type": "text/plain" });
     response.write(result);
     response.end();
+}
+
+
+const fileServer = new FileServer((error, request, response) => {
+    response.statusCode = error.code || 500;
+    response.writeHead(response.statusCode, { "Content-Type": "text/plain" });
+    response.write(error.message);
+    response.end();
+});
+
+/**
+@param {http.IncomingMessage} request 
+@param {http.ServerResponse} response 
+*/
+export async function file(request, response) {
+    let filePath = request.url.substring("/file/".length)
+    try {
+        fileServer.serveFile(filePath)(request, response)
+    } catch (error) {
+        throw error
+    }
 }
