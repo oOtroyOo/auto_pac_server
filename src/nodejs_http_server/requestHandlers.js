@@ -132,6 +132,7 @@ const fileServer = new FileServer((error, request, response) => {
 */
 export async function file(request, response) {
     let filePath = request.url.substring("/file/".length)
+    filePath = decodeURI(filePath)
     try {
         fileServer.serveFile(filePath)(request, response)
     } catch (error) {
