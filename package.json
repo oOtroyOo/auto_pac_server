@@ -23,6 +23,7 @@
   "dependencies": {
     "mime-types": "*",
     "file-server": "*",
-    "wakeup": "*"
+    "wakeup": "*",
+    "local-devices": "*"
   }
 }

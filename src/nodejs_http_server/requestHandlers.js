@@ -7,6 +7,7 @@ import Server from "./server.js"
 import Socket from "dgram";
 import mime from "mime-types";
 import FileServer from "file-server";
+import findLocalDevices from "local-devices";
 
 export function hello(query, response) {
     console.log("Hello World");
@@ -86,7 +87,13 @@ export async function wakeup(request, response) {
     let result = ""
     let done = false;
     let parseMAC = Wakeup.parseMAC(mac)
-    console.log("MAC:" + mac + " " + parseMAC);
+
+    let devices = await findLocalDevices()
+    result += "MAC:" + mac + " Find:" + (devices.findIndex((d) => {
+        return mac.toLocaleLowerCase() == d.mac.toLocaleLowerCase()
+    }) > -1) + "\n"
+
+    console.log(result);
     let code = 200
     try {
         /**@type {Socket}    */
