@@ -89,9 +89,9 @@ export async function wakeup(request, response) {
     let parseMAC = Wakeup.parseMAC(mac)
 
     let devices = await findLocalDevices()
-    result += "MAC:" + mac + " Find:" + (devices.findIndex((d) => {
+    result += "MAC:" + mac + " Find:" + (devices.find((d) => {
         return mac.toLocaleLowerCase() == d.mac.toLocaleLowerCase()
-    }) > -1) + "\n"
+    })?.ip) + "\n"
 
     console.log(result);
     let code = 200
