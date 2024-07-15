@@ -13,20 +13,25 @@ if (fs.existsSync("dist")) {
     fs.rmSync("dist", { force: true, recursive: true })
 }
 fs.mkdirSync("dist")
-fs.copyFileSync('./package.json', "dist/package.json")
+child_process.execSync("npm run build-esbuild")
 
 var config = {
-    "main": "src/" + packageJSON.main,
+    "main": "dist/" + packageJSON.main,
     "output": "dist/" + packageJSON.main.replace(path.extname(packageJSON.main), ".blob")
 }
 fs.writeFileSync("dist/sea-config.json", JSON.stringify(config))
+child_process.execSync(process.execPath + " --experimental-sea-config dist/sea-config.json")
 
 var exePath
 if (os.platform().startsWith("win")) {
-    exePath = "dist/" + packageJSON.name + '.exe'
+    exePath = packageJSON.name + '.exe'
 } else {
-    exePath = "dist/" + packageJSON.name
+    exePath = packageJSON.name
 }
-fs.copyFileSync(process.execPath, exePath)
-child_process.exec(process.execPath + " --experimental-sea-config dist/sea-config.json")
-child_process.exec(`npx postject ${exePath} NODE_SEA_BLOB ${config.output} --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2 --overwrite`)
+fs.copyFileSync(process.execPath, "dist/" + exePath)
+child_process.execSync(`npx postject dist/${exePath} NODE_SEA_BLOB ${config.output} --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2 --overwrite`)
+if (fs.existsSync("bin/" + exePath)) {
+    fs.rmSync("bin/" + exePath, { force: true })
+}
+fs.renameSync("dist/" + exePath, "bin/" + exePath)
+fs.rmSync("dist", { force: true, recursive: true })
