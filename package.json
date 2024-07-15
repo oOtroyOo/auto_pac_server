@@ -18,7 +18,8 @@
   },
   "devDependencies": {
     "esbuild": "*",
-    "pkg": "*"
+    "pkg": "*",
+    "postject": "*"
   },
   "dependencies": {
     "mime-types": "*",
