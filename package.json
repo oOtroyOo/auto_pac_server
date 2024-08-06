@@ -22,12 +22,12 @@
     "postject": "*"
   },
   "dependencies": {
-    "koa":"*",
-    "koa-router":"*",
-    "koa-static":"*",
-    "koa-mount":"*",
-    "koa-serve-index":"*",
-    "koa-connect":"*",
+    "koa": "*",
+    "koa-router": "*",
+    "koa-static": "*",
+    "koa-mount": "*",
+    "koa-serve-index": "*",
+    "koa-sslify": "*",
     "mime-types": "*",
     "file-server": "*",
     "wakeup": "*",

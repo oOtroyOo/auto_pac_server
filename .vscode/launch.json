@@ -17,7 +17,7 @@
                 "run-script",
                 "dev"
             ],
-            //  "console": "externalTerminal"
+            "console": "integratedTerminal"
         }
     ]
 }
