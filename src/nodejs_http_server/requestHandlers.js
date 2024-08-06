@@ -8,21 +8,36 @@ import Socket from "dgram";
 import mime from "mime-types";
 import FileServer from "file-server";
 import findLocalDevices from "local-devices";
+import Koa from 'koa';
 
-export function hello(query, response) {
-    console.log("Hello World");
-    response.writeHead(200, { "Content-Type": "text/plain" });
-    response.write("Hello World");
-    response.end();
+/**
+@param {Koa.ParameterizedContext<Koa.DefaultState, Koa.DefaultContext, string>} ctx 
+@param {Koa.Next} next 
+*/
+export function hello(ctx, next) {
+    var request = ctx.request
+    var response = ctx.response
+    var content = "Hello World"
+    if (request.url.indexOf('?') > 0) {
+        content += request.url.substring(request.url.indexOf('?') + 1)
+    }
+    console.log(content);
+    response.type = "text/plain"
+    response.body = content
 }
+
 const ipTest = new RegExp("\\d+\\.\\d+\\.\\d+\\.\\d+")
 
 var pachandle = {};
+
+
 /**
-@param {http.IncomingMessage} request 
-@param {http.ServerResponse} response 
+@param {Koa.ParameterizedContext<Koa.DefaultState, Koa.DefaultContext, string>} ctx 
+@param {Koa.Next} next 
 */
-export async function pac(request, response) {
+export async function pac(ctx, next) {
+    var request = ctx.request
+    var response = ctx.response
     /** @type string */
     var host = request.headers["host"]
     if (host != undefined && host != '') {
@@ -65,18 +80,21 @@ export async function pac(request, response) {
             pachandle[host] = null
         }
     }
-
-    response.writeHead(200, { "Content-Type": "text/plain" });
-    response.write(content);
-    response.end();
+    // response.set({
+    //     "Content-Type": "text/plain"
+    // })
+    response.type = "text/plain"
+    response.body = content;
 }
 
 
 /**
-@param {http.IncomingMessage} request 
-@param {http.ServerResponse} response 
+@param {Koa.ParameterizedContext<Koa.DefaultState, Koa.DefaultContext, string>} ctx 
+@param {Koa.Next} next 
 */
-export async function wakeup(request, response) {
+export async function wakeup(ctx, next) {
+    var request = ctx.request
+    var response = ctx.response
     let mac = "70-85-C2-CB-E4-B2"
     let bradcast = "192.168.2.255"
     if (request.url.indexOf('?') > 0) {
@@ -120,10 +138,12 @@ export async function wakeup(request, response) {
             setTimeout(waitForFoo, 30);
         })();
     });
-
-    response.writeHead(code, { "Content-Type": "text/plain" });
-    response.write(result);
-    response.end();
+    response.status = code
+    // response.set({
+    //     "Content-Type": "text/plain"
+    // })
+    response.type = "text/plain"
+    response.body = result
 }
 
 
@@ -134,10 +154,12 @@ const fileServer = new FileServer((error, request, response) => {
     response.end();
 });
 
+
 /**
 @param {http.IncomingMessage} request 
 @param {http.ServerResponse} response 
 */
+/*
 export async function file(request, response) {
     let filePath = request.url.substring("/file/".length)
     filePath = decodeURI(filePath)
@@ -148,3 +170,4 @@ export async function file(request, response) {
         throw error
     }
 }
+*/

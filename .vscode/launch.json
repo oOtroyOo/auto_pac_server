@@ -10,20 +10,14 @@
             "request": "launch",
             "cwd": "${workspaceFolder}",
             "runtimeExecutable": "npm",
+            "env": {
+                "DEBUG": "koa*"
+            },
             "runtimeArgs": [
                 "run-script",
                 "dev"
             ],
-            "console": "integratedTerminal"
-        },
-        {
-            "type": "node",
-            "request": "launch",
-            "name": "Debug this file",
-            "program": "${file}",
-            "skipFiles": [
-                "<node_internals>/**"
-            ]
+            //  "console": "externalTerminal"
         }
     ]
 }
