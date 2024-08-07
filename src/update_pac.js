@@ -2,9 +2,9 @@
 import fetch from 'node-fetch';
 'use strict';
 
-import * as https from 'https';
-import * as path from 'path';
-import * as fs from 'fs';
+import https from 'https';
+import path from 'path';
+import fs from 'fs';
 
 const GFWLIST_PATH = [
   "https://raw.githubusercontent.com/gfwlist/gfwlist/master/gfwlist.txt",
@@ -36,39 +36,37 @@ export default class update_pac {
    */
   async _httpsGet(path) {
     // 5 second timeout:
-    var controller = new AbortController()
+    let controller = new AbortController()
     console.log("Send: " + path)
 
-    var timeoutId = setTimeout(() => controller.abort(), 5000)
+    let timeoutId = setTimeout(() => controller.abort(), 5000)
     /** @type {RequestInit} */
-    var initOption = {}
+    let initOption = {}
     initOption.signal = controller.signal
-    return await fetch(path, initOption).then(response => {
-      console.log("Get: " + path)
-      if (response.status < 200 || response.status >= 300) {
-        throw (new Error('statusCode=' + response.status + " :" + response.statusText));
+    // return await fetch(path, initOption).then(response => {
+    //   console.log("Get: " + path)
+    //   if (response.status < 200 || response.status >= 300) {
+    //     throw (new Error('statusCode=' + response.status + " :" + response.statusText));
+    //   }
+    //   return response.text()
+    // })
+
+    let response = await fetch(path, initOption)
+    if (response.status < 200 || response.status >= 300) {
+      throw (new Error('statusCode=' + response.status + " :" + response.statusText));
+    }
+    try {
+      console.log("Find: " + path)
+      let content = await response.text()
+      return content
+    } catch (error) {
+      if (error instanceof AbortError) {
       }
-      return response.text()
-    })
-
-    // Promise封装异步
-    // return new Promise((resolve, reject) => {
-    //   /**@type {https.RequestOptions} */
-    //   var options = {}
-    //   options.timeout = 3;
-    //   options.sessionTimeout = 3;
-    //   const req = https.get(path, options);
-    //   req.on('response', res => {
-    //     if (res.statusCode < 200 || res.statusCode >= 300) {
-    //       return reject(new Error('statusCode=' + res.statusCode));
-    //     }
-    //     const chunks = [];
-    //     res.on('data', chunk => chunks.push(chunk));
-    //     res.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
-    //   });
-    //   req.on('error', err => reject(err));
-    // });
-
+      else {
+        console.error(error);
+        return undefined
+      }
+    }
   }
 
   // 获取域名
