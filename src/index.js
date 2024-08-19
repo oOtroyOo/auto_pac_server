@@ -4,7 +4,7 @@ import * as proxy from "./proxy.js"
 import http, { request } from "http"
 import https from "https"
 import path from 'path';
-import fs from "fs/promises";
+import fs from "fs";
 import contentType from 'content-type';
 import Koa from 'koa';
 import koaStatic from 'koa-static';
@@ -36,9 +36,6 @@ process.argv.forEach((val, index) => {
     }
 });
 
-
-
-
 const app = new Koa();
 
 /* 大try中间件 */
@@ -57,7 +54,6 @@ app.use(async (ctx, next) => {
         console.log('end ' + ctx.method + ":" + ctx.URL);
     }
 });
-
 
 
 // 通用Header处理
@@ -106,7 +102,6 @@ app.use(async (ctx, next) => {
 // app.use(bodyParser());
 // app.use(koaBody.koaBody({}));
 
-
 /* 路由部分 */
 const router = new koaRouter({ strict: true });
 router.all('/', requestHandlers.hello);
@@ -124,7 +119,7 @@ app.use(koaMount('/file', async (ctx, next) => {
     if (ctx.accept.headers.accept === "*/*") {
         try {
             var localPath = path.resolve("." + decodeURIComponent(ctx.path))
-            var stat = await fs.stat(localPath)
+            var stat = fs.statSync(localPath)
             if (stat.isDirectory()) {
                 ctx.accept.headers.accept = "application/json"
             }
@@ -137,23 +132,29 @@ app.use(koaMount('/file', async (ctx, next) => {
 app.use(koaMount('/file', koaStatic('./', {})));
 
 
-app.listen(port)
+app.listen(port, () => {
+    console.log("start " + port)
+})
     .addListener('connect', proxy._onConnect)
 
 
 try {
-    await fs.access('ssl/server.crt')
-    await fs.access('ssl/server.key')
+    fs.accessSync('ssl/server.crt')
+    fs.accessSync('ssl/server.key')
     var sslMidware = koaSslify.default({
         port: port + 1
     })
     // app.use(sslMidware)
+    var key = (fs.readFileSync('ssl/server.key'))
+    var cert = (fs.readFileSync('ssl/server.crt'))
     https.createServer({
-        key: await (fs.readFile('ssl/server.key')),
-        cert: await (fs.readFile('ssl/server.crt'))
+        key: key,
+        cert: cert
     }, app.callback())
         .addListener('connect', proxy._onConnect)
-        .listen(port + 1);
+        .listen(port + 1, () => {
+            console.log("start " + (port + 1))
+        });
 
 } catch (error) {
     console.log("本地ssl文件无效 " + error)
