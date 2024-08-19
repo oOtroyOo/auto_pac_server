@@ -15,8 +15,9 @@ import {
     setTimeout,
     setImmediate,
     setInterval,
-} from 'timers/promises';
-import { log, time } from "console";
+
+} from 'timers/promises'; // 默认常用计时方法替换成Async方法
+
 
 /**
 @param {Koa.ParameterizedContext<Koa.DefaultState, Koa.DefaultContext, string>} ctx 
@@ -29,6 +30,13 @@ export async function hello(ctx, next) {
     var content = "Hello World"
     if (request.url.indexOf('?') > 0) {
         content += request.url.substring(request.url.indexOf('?') + 1)
+    }
+    if (request.body) {
+        if (typeof (request.body) == "string") {
+            content += request.body
+        } else if (Object.keys(request.body).length > 0) {
+            content += JSON.stringify(request.body)
+        }
     }
     console.log(content);
     ctx.status = 200

@@ -3,19 +3,27 @@ import * as requestHandlers from "./nodejs_http_server/requestHandlers.js"
 import * as proxy from "./proxy.js"
 import http, { request } from "http"
 import https from "https"
+import path from 'path';
+import fs from "fs/promises";
+import contentType from 'content-type';
 import Koa from 'koa';
-import serve from 'koa-static';
-import Router from 'koa-router';
-import mount from 'koa-mount';
-import convert from 'koa-convert';
-import serveIndex from 'koa-serve-index'
-import sslify from 'koa-sslify'
-import fs from "fs";
+import koaStatic from 'koa-static';
+import koaRouter from 'koa-router';
+import koaMount from 'koa-mount';
+import koaConvert from 'koa-convert';
+import koaServeIndex from 'koa-serve-index'
+import koaSslify from 'koa-sslify'
+import koaBodyParser from 'koa-bodyparser';
+import koaBody from 'koa-body';
+import koaCharset from 'koa-charset';
+import koaETag from 'koa-etag';
+import koaConditional from 'koa-conditional-get';
+
 import {
     setTimeout,
     setImmediate,
     setInterval,
-} from 'timers/promises';
+} from 'timers/promises'; // 默认常用计时方法替换成Async方法
 
 let port = 8880
 process.argv.forEach((val, index) => {
@@ -29,16 +37,11 @@ process.argv.forEach((val, index) => {
 });
 
 
-const app = new Koa();
-const router = new Router({ strict: true });
-var sslMidware
-if (fs.existsSync('ssl/server.key') && fs.existsSync('ssl/server.key')) {
-    sslMidware = sslify.default({
-        port: port + 1
-    })
-}
 
-/* 中间件 */
+
+const app = new Koa();
+
+/* 大try中间件 */
 app.use(async (ctx, next) => {
 
     try {
@@ -55,10 +58,12 @@ app.use(async (ctx, next) => {
     }
 });
 
-// 通用处理
+
+
+// 通用Header处理
 app.use(async (ctx, next) => {
     var language = ctx.acceptsLanguages()
-    if (language && language.length > 0) {
+    if (language && language.length > 0 && language[0] != '*') {
         ctx.response.set('content-language', language[0])
     }
 
@@ -72,7 +77,38 @@ app.use(async (ctx, next) => {
     await next()
 })
 
+
+/* 解析Body部分 */
+app.use(koaConditional())
+app.use(koaCharset())
+app.use(koaETag({ weak: false }))
+
+const bodyEncoding = {
+}
+const bodyParse = koaBody.koaBody({})
+app.use(async (ctx, next) => {
+    const type = ctx.request.header["content-type"];
+    if (type) {
+        const parsedType = contentType.parse(type);
+        if (parsedType && parsedType.parameters.charset) {
+            if (bodyEncoding[parsedType.parameters.charset] == undefined) {
+                bodyEncoding[parsedType.parameters.charset] = koaBody.koaBody({
+                    encoding: parsedType.parameters.charset
+                })
+            }
+            await bodyEncoding[parsedType.parameters.charset](ctx, next)
+            return
+        }
+    }
+    await bodyParse(ctx, next)
+});
+
+// app.use(bodyParser());
+// app.use(koaBody.koaBody({}));
+
+
 /* 路由部分 */
+const router = new koaRouter({ strict: true });
 router.all('/', requestHandlers.hello);
 Object.keys(requestHandlers).forEach(function (key) {
     router.all('/' + key, requestHandlers[key])
@@ -80,18 +116,45 @@ Object.keys(requestHandlers).forEach(function (key) {
 
 app.use(router.routes());
 
-app.use(mount('/file', convert(serveIndex('./', { icons: true }))));
-app.use(mount('/file', serve('./', { icons: true })));
+
+
+/* 文件传递部分 */
+const serveIndexFunc = koaConvert(koaServeIndex('./', { icons: true, view: 'details' }))
+app.use(koaMount('/file', async (ctx, next) => {
+    if (ctx.accept.headers.accept === "*/*") {
+        try {
+            var localPath = path.resolve("." + decodeURIComponent(ctx.path))
+            var stat = await fs.stat(localPath)
+            if (stat.isDirectory()) {
+                ctx.accept.headers.accept = "application/json"
+            }
+        } catch (error) {
+            console.log(error)
+        }
+    }
+    await serveIndexFunc(ctx, next)
+}));
+app.use(koaMount('/file', koaStatic('./', {})));
+
 
 app.listen(port)
     .addListener('connect', proxy._onConnect)
 
-if (sslMidware) {
+
+try {
+    await fs.access('ssl/server.crt')
+    await fs.access('ssl/server.key')
+    var sslMidware = koaSslify.default({
+        port: port + 1
+    })
     // app.use(sslMidware)
     https.createServer({
-        key: fs.readFileSync('ssl/server.key'),
-        cert: fs.readFileSync('ssl/server.crt')
+        key: await (fs.readFile('ssl/server.key')),
+        cert: await (fs.readFile('ssl/server.crt'))
     }, app.callback())
         .addListener('connect', proxy._onConnect)
         .listen(port + 1);
+
+} catch (error) {
+    console.log("本地ssl文件无效 " + error)
 }

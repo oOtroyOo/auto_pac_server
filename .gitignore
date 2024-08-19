@@ -120,3 +120,4 @@ dist.zip
 
 package-lock.json
 /bin/
+*.exe
