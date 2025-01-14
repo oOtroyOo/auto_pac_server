@@ -131,31 +131,33 @@ app.use(koaMount('/file', async (ctx, next) => {
 }));
 app.use(koaMount('/file', koaStatic('./', {})));
 
-
-app.listen(port, () => {
-    console.log("start " + port)
-})
-    .addListener('connect', proxy._onConnect)
-
-
 try {
-    fs.accessSync('ssl/server.crt')
-    fs.accessSync('ssl/server.key')
-    var sslMidware = koaSslify.default({
-        port: port + 1
-    })
+    const certFile = "ECC-cert.pem"
+    const keyFile = "ECC-privkey.pem"
+    fs.accessSync(certFile)
+    fs.accessSync(keyFile)
+    app.use(koaSslify.default({
+        port: port
+    }))
     // app.use(sslMidware)
-    var key = (fs.readFileSync('ssl/server.key'))
-    var cert = (fs.readFileSync('ssl/server.crt'))
+    app.listen(port + 1, () => {
+        console.log("start " + (port + 1))
+    })
+        .addListener('connect', proxy._onConnect)
     https.createServer({
-        key: key,
-        cert: cert
+        cert: fs.readFileSync(certFile),
+        key: fs.readFileSync(keyFile)
     }, app.callback())
         .addListener('connect', proxy._onConnect)
-        .listen(port + 1, () => {
-            console.log("start " + (port + 1))
+        .listen(port, () => {
+            console.log("start " + port)
         });
 
 } catch (error) {
     console.log("本地ssl文件无效 " + error)
+
+    app.listen(port, () => {
+        console.log("start " + port)
+    })
+        .addListener('connect', proxy._onConnect)
 }
