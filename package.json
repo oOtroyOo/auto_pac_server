@@ -32,6 +32,7 @@
     "koa-bodyparser": "*",
     "koa-body": "*",
     "koa-etag": "*",
+    "koa2-cors":"*",
     "koa-conditional-get": "*",
     "koa-charset": "*",
     "mime-types": "*",
