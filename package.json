@@ -24,6 +24,7 @@
   },
   "dependencies": {
     "file-server": "*",
+    "glob": "*",
     "koa": "*",
     "koa-body": "*",
     "koa-bodyparser": "*",
