@@ -2,7 +2,6 @@ import Server from "./nodejs_http_server/server.js"
 import * as requestHandlers from "./nodejs_http_server/requestHandlers.js"
 import * as proxy from "./proxy.js"
 import url from "url"
-import { glob, globStream } from 'glob';
 import BaseController from './controllers/BaseController.js'
 import http, { request } from "http"
 import https from "https"
@@ -30,10 +29,10 @@ import {
     setInterval,
 } from 'timers/promises'; // 默认常用计时方法替换成Async方法
 
-// const __filename = url.fileURLToPath(import.meta.url).replaceAll('\\', '/')
-// const __dirname = path.dirname(__filename).replaceAll('\\', '/')
-const __filename = import.meta.filename;
-const __dirname = import.meta.dirname;
+const __filename = url.fileURLToPath(import.meta.url).replaceAll('\\', '/')
+const __dirname = path.dirname(__filename).replaceAll('\\', '/')
+// const __filename = import.meta.filename;
+// const __dirname = import.meta.dirname;
 
 let port = 8880
 process.argv.forEach((val, index) => {
@@ -126,9 +125,11 @@ Object.keys(requestHandlers).forEach(function (key) {
     router.all('/' + key, requestHandlers[key])
 })
 
-for (let localFile of glob.globSync(`${__dirname}/controllers/**/*.js`, globStream)) {
+
+for (let localFile of fs.readdirSync(`${__dirname}/controllers`)) {
     try {
-        localFile = './' + path.relative(__dirname, localFile).replaceAll('\\', '/')
+        localFile = `./controllers/${localFile}`
+        console.log(localFile)
         const Controller = (await import(localFile)).default;
         if (Controller && typeof Controller === 'function') {
             new Controller(app, router);
