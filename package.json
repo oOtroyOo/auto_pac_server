@@ -23,7 +23,6 @@
     "postject": "*"
   },
   "dependencies": {
-    "file-server": "*",
     "koa": "*",
     "koa-body": "*",
     "koa-cache-control": "*",
@@ -35,9 +34,7 @@
     "koa-serve-index": "*",
     "koa-sslify": "*",
     "koa-static": "*",
-    "koa2-cors": "*",
     "local-devices": "*",
-    "mime-types": "*",
     "node-fetch": "*",
     "wakeup": "*"
   }

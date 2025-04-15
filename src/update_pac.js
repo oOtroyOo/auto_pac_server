@@ -1,9 +1,6 @@
 #!/usr/bin/env node
 'use strict';
 import fetch from 'node-fetch';
-
-import https from 'https';
-import path from 'path';
 import fs from 'fs';
 
 const GFWLIST_PATH = [
