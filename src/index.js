@@ -1,6 +1,9 @@
 import Server from "./nodejs_http_server/server.js"
 import * as requestHandlers from "./nodejs_http_server/requestHandlers.js"
 import * as proxy from "./proxy.js"
+import url from "url"
+import glob from 'glob';
+import BaseController from './controllers/BaseController.js'
 import http, { request } from "http"
 import https from "https"
 import path from 'path';
@@ -26,6 +29,11 @@ import {
     setImmediate,
     setInterval,
 } from 'timers/promises'; // 默认常用计时方法替换成Async方法
+
+// const __filename = url.fileURLToPath(import.meta.url).replaceAll('\\', '/')
+// const __dirname = path.dirname(__filename).replaceAll('\\', '/')
+const __filename = import.meta.filename;
+const __dirname = import.meta.dirname;
 
 let port = 8880
 process.argv.forEach((val, index) => {
@@ -118,9 +126,19 @@ Object.keys(requestHandlers).forEach(function (key) {
     router.all('/' + key, requestHandlers[key])
 })
 
+for (const localFile of glob.sync(`${__dirname}/controllers/**/*.js`)) {
+    try {
+        const Controller = (await import('.' + localFile.substring(__dirname.length))).default;
+        if (Controller && typeof Controller === 'function') {
+            new Controller(app, router);
+        }
+    } catch (error) {
+        console.error(`Failed to load controller from file: ${localFile}`, error);
+    }
+}
+
 app.use(router.routes());
-
-
+app.use(router.allowedMethods());
 
 /* 文件传递部分 */
 const serveIndexFunc = koaConvert(koaServeIndex('./', { icons: true, view: 'details' }))
