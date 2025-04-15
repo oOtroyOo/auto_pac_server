@@ -19,6 +19,7 @@ import koaBody from 'koa-body';
 import koaCharset from 'koa-charset';
 import koaETag from 'koa-etag';
 import koaConditional from 'koa-conditional-get';
+import cacheControl from 'koa-cache-control';
 
 import {
     setTimeout,
@@ -79,6 +80,13 @@ app.use(async (ctx, next) => {
 app.use(koaConditional())
 app.use(koaCharset())
 app.use(koaETag({ weak: false }))
+// 使用koa-cache-control中间件，并设置缓存策略
+app.use(cacheControl({
+    // maxAge: 60 * 60 * 24, // 缓存1天
+    noCache: false, // 允许缓存
+    // mustRevalidate: true // 要求重新验证
+}));
+
 
 const bodyEncoding = {
 }
