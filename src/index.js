@@ -2,7 +2,7 @@ import Server from "./nodejs_http_server/server.js"
 import * as requestHandlers from "./nodejs_http_server/requestHandlers.js"
 import * as proxy from "./proxy.js"
 import url from "url"
-import glob from 'glob';
+import { glob, globStream } from 'glob';
 import BaseController from './controllers/BaseController.js'
 import http, { request } from "http"
 import https from "https"
@@ -126,9 +126,10 @@ Object.keys(requestHandlers).forEach(function (key) {
     router.all('/' + key, requestHandlers[key])
 })
 
-for (const localFile of glob.sync(`${__dirname}/controllers/**/*.js`)) {
+for (let localFile of glob.globSync(`${__dirname}/controllers/**/*.js`, globStream)) {
     try {
-        const Controller = (await import('.' + localFile.substring(__dirname.length))).default;
+        localFile = './' + path.relative(__dirname, localFile).replaceAll('\\', '/')
+        const Controller = (await import(localFile)).default;
         if (Controller && typeof Controller === 'function') {
             new Controller(app, router);
         }
