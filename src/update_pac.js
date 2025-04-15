@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-import fetch from 'node-fetch';
 'use strict';
+import fetch from 'node-fetch';
 
 import https from 'https';
 import path from 'path';

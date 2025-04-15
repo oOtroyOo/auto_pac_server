@@ -17,27 +17,28 @@
     "dev": "node --es-module-specifier-resolution=node src/index.js --input-type=module --port=8880"
   },
   "devDependencies": {
+    "emitter": "*",
     "esbuild": "*",
     "pkg": "*",
-    "postject": "*",
-    "emitter": "*"
+    "postject": "*"
   },
   "dependencies": {
+    "file-server": "*",
     "koa": "*",
-    "koa-router": "*",
-    "koa-static": "*",
+    "koa-body": "*",
+    "koa-bodyparser": "*",
+    "koa-charset": "*",
+    "koa-conditional-get": "*",
+    "koa-etag": "*",
     "koa-mount": "*",
+    "koa-router": "*",
     "koa-serve-index": "*",
     "koa-sslify": "*",
-    "koa-bodyparser": "*",
-    "koa-body": "*",
-    "koa-etag": "*",
-    "koa2-cors":"*",
-    "koa-conditional-get": "*",
-    "koa-charset": "*",
+    "koa-static": "*",
+    "koa2-cors": "*",
+    "local-devices": "*",
     "mime-types": "*",
-    "file-server": "*",
-    "wakeup": "*",
-    "local-devices": "*"
+    "node-fetch": "*",
+    "wakeup": "*"
   }
 }
