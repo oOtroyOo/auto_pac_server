@@ -135,20 +135,22 @@ app.use(koaMount('/file', koaStatic('./', {})));
 try {
     const certs = {}
 
-    fs.readdirSync("cert").forEach((dir) => {
-        const certPath = path.join("cert", dir, 'cert.pem');
-        const keyPath = path.join("cert", dir, 'privkey.pem');
-        console.log(certPath)
-        // Check if both cert.pem and privkey.pem exist in the directory
-        if (fs.existsSync(certPath) && fs.existsSync(keyPath)) {
+    if (fs.existsSync("cert")) {
+        fs.readdirSync("cert").forEach((dir) => {
+            const certPath = path.join("cert", dir, 'cert.pem');
+            const keyPath = path.join("cert", dir, 'privkey.pem');
+            console.log(certPath)
+            // Check if both cert.pem and privkey.pem exist in the directory
+            if (fs.existsSync(certPath) && fs.existsSync(keyPath)) {
 
-            certs[dir] = {
-                cert: fs.readFileSync(certPath),
-                key: fs.readFileSync(keyPath)
-            };
-        }
-    });
- 
+                certs[dir] = {
+                    cert: fs.readFileSync(certPath),
+                    key: fs.readFileSync(keyPath)
+                };
+            }
+        });
+    }
+
     if (Object.keys(certs).length > 0) {
         console.log('USE SSL')
         app.use(koaSslify.default({
