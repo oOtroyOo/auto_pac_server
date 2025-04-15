@@ -1,0 +1,1 @@
+sudo netstat -tulnp | grep :8880 | awk '{print $7}' | cut -d'/' -f1 | xargs sudo kill -9

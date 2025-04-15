@@ -133,24 +133,29 @@ app.use(koaMount('/file', async (ctx, next) => {
 app.use(koaMount('/file', koaStatic('./', {})));
 
 try {
-
     const certs = {}
 
-    fs.readdirSync("cert").forEach((dir) => {
-        const certPath = path.join("cert", dir, 'cert.pem');
-        const keyPath = path.join("cert", dir, 'privkey.pem');
+    if (fs.existsSync("cert")) {
+        fs.readdirSync("cert").forEach((dir) => {
+            const certPath = path.join("cert", dir, 'cert.pem');
+            const keyPath = path.join("cert", dir, 'privkey.pem');
+            console.log(certPath)
+            // Check if both cert.pem and privkey.pem exist in the directory
+            if (fs.existsSync(certPath) && fs.existsSync(keyPath)) {
 
-        // Check if both cert.pem and privkey.pem exist in the directory
-        if (fs.existsSync(certPath) && fs.existsSync(keyPath)) {
-            console.log(dir)
-            certs[dir] = {
-                cert: fs.readFileSync(certPath),
-                key: fs.readFileSync(keyPath)
-            };
-        }
-    });
+                certs[dir] = {
+                    cert: fs.readFileSync(certPath),
+                    key: fs.readFileSync(keyPath)
+                };
+            }
+        });
+    }
 
     if (Object.keys(certs).length > 0) {
+        console.log('USE SSL')
+        app.use(koaSslify.default({
+            port: port
+        }))
         const httpsOptions = {
             SNICallback: (servername, cb) => {
                 cb(null, tls.createSecureContext(certs[servername]));
@@ -158,17 +163,13 @@ try {
             cert: certs[Object.keys(certs)[0]].cert,
             key: certs[Object.keys(certs)[0]].key
         }
-
-        app.use(koaSslify.default({
-            port: port
-        }))
-
         https.createServer(httpsOptions, app.callback())
             .addListener('connect', proxy._onConnect)
             .listen(port, () => {
                 console.log("start " + port)
             });
     } else {
+        console.log('NO SSL')
         app.listen(port, () => {
             console.log("start " + port)
         })
@@ -177,3 +178,4 @@ try {
 } catch (error) {
     console.log("服务器启动失败 " + error)
 }
+
