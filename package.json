@@ -26,7 +26,6 @@
     "file-server": "*",
     "koa": "*",
     "koa-body": "*",
-    "koa-bodyparser": "*",
     "koa-cache-control": "*",
     "koa-charset": "*",
     "koa-conditional-get": "*",

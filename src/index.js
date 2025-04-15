@@ -1,22 +1,13 @@
-import Server from "./nodejs_http_server/server.js"
-import * as requestHandlers from "./nodejs_http_server/requestHandlers.js"
 import * as proxy from "./proxy.js"
 import url from "url"
-import BaseController from './controllers/BaseController.js'
-import http, { request } from "http"
 import https from "https"
 import path from 'path';
 import tls from 'tls';
 import fs from "fs";
 import contentType from 'content-type';
 import Koa from 'koa';
-import koaStatic from 'koa-static';
 import koaRouter from 'koa-router';
-import koaMount from 'koa-mount';
-import koaConvert from 'koa-convert';
-import koaServeIndex from 'koa-serve-index'
 import koaSslify from 'koa-sslify'
-import koaBodyParser from 'koa-bodyparser';
 import koaBody from 'koa-body';
 import koaCharset from 'koa-charset';
 import koaETag from 'koa-etag';
@@ -120,11 +111,6 @@ app.use(async (ctx, next) => {
 
 /* 路由部分 */
 const router = new koaRouter({ strict: true });
-router.all('/', requestHandlers.hello);
-Object.keys(requestHandlers).forEach(function (key) {
-    router.all('/' + key, requestHandlers[key])
-})
-
 
 for (let localFile of fs.readdirSync(`${__dirname}/controllers`)) {
     try {
@@ -141,24 +127,6 @@ for (let localFile of fs.readdirSync(`${__dirname}/controllers`)) {
 
 app.use(router.routes());
 app.use(router.allowedMethods());
-
-/* 文件传递部分 */
-const serveIndexFunc = koaConvert(koaServeIndex('./', { icons: true, view: 'details' }))
-app.use(koaMount('/file', async (ctx, next) => {
-    if (ctx.accept.headers.accept === "*/*") {
-        try {
-            var localPath = path.resolve("." + decodeURIComponent(ctx.path))
-            var stat = fs.statSync(localPath)
-            if (stat.isDirectory()) {
-                ctx.accept.headers.accept = "application/json"
-            }
-        } catch (error) {
-            console.log(error)
-        }
-    }
-    await serveIndexFunc(ctx, next)
-}));
-app.use(koaMount('/file', koaStatic('./', {})));
 
 try {
     const certs = {}

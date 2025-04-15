@@ -15,7 +15,9 @@ export default class BaseController {
     */
     constructor(app, router) {
         const name = this.constructor.name.replace('Controller', '').toLowerCase();
-        router.all('/' + name, this.request)
+        router.all('/' + name, async (ctx, next) => {
+            await this.request(ctx, next)
+        })
     }
     /**
     @param {Koa.ParameterizedContext<Koa.DefaultState, Koa.DefaultContext, string>} ctx 

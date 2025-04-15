@@ -129,7 +129,6 @@ export async function pac(ctx, next) {
     await next()
 }
 
-const default_mac = "70-85-C2-CB-E4-B2"
 /**
 @param {Koa.ParameterizedContext<Koa.DefaultState, Koa.DefaultContext, string>} ctx 
 @param {Koa.Next} next 
