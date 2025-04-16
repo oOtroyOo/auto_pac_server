@@ -119,7 +119,7 @@ export default class IpInfoController extends BaseController {
                 }
             }
         }
-        return await self.getInfo(querystring)
+        return await this.getInfo(querystring)
     }
 
     async getInfo(address) {
