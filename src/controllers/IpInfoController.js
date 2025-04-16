@@ -3,7 +3,6 @@ import ipaddress from 'ip-address'
 import os from 'os';
 import ip from 'ip';
 import Koa from 'koa';
-import { Promise } from 'emitter';
 import { File } from 'buffer';
 import fs from 'fs/promises'
 import { JSDOM } from 'jsdom';
@@ -21,7 +20,7 @@ export default class IpInfoController extends BaseController {
     */
     constructor(app, router) {
         super(app, router)
-        this.wait = Promise(async (resolve, reject) => {
+        this.wait = new Promise(async (resolve, reject) => {
             resolve(await this.myIps())
         }).then((result) => {
             this.wait = undefined
@@ -34,20 +33,7 @@ export default class IpInfoController extends BaseController {
      * @param {Koa.Next} next 
      */
     async request(ctx, next) {
-        let querystring = ctx.querystring
-        if (!querystring) {
-            if (ip.isV4Format(ctx.request.ip)) {
-                querystring = ctx.request.ip
-            } else {
-                let ipAddress = new ipaddress.Address6(ctx.request.ip)
-                if (ipAddress.is4()) {
-                    querystring = ipAddress.to4().addressMinusSuffix
-                } else {
-                    querystring = ipAddress.addressMinusSuffix
-                }
-            }
-        }
-        let ipInfo = await this.getInfo(querystring)
+        let ipInfo = await this.getInfoByRequest(ctx)
         ctx.body = ipInfo
         await super.request(ctx, next)
     }
@@ -115,6 +101,25 @@ export default class IpInfoController extends BaseController {
         }
         this.wait = undefined
         return IpInfoController.localIps
+    }
+    /**
+     * @param {Koa.ParameterizedContext<Koa.DefaultState, Koa.DefaultContext, string>} ctx 
+     */
+    async getInfoByRequest(ctx) {
+        let querystring = ctx.querystring
+        if (!querystring) {
+            if (ip.isV4Format(ctx.request.ip)) {
+                querystring = ctx.request.ip
+            } else {
+                let ipAddress = new ipaddress.Address6(ctx.request.ip)
+                if (ipAddress.is4()) {
+                    querystring = ipAddress.to4().addressMinusSuffix
+                } else {
+                    querystring = ipAddress.addressMinusSuffix
+                }
+            }
+        }
+        return await self.getInfo(querystring)
     }
 
     async getInfo(address) {
