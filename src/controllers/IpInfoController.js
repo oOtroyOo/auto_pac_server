@@ -165,6 +165,7 @@ export default class IpInfoController extends BaseController {
             console.log(url + " : " + response.status)
             const data = await response.text();
             if (data) {
+                console.log(data + "\n\n")
                 // const filePath = `./ip_info_${ipAddress.addressMinusSuffix}.html`;
                 // try {
                 //     await fs.writeFile(filePath, data);
@@ -175,21 +176,24 @@ export default class IpInfoController extends BaseController {
                 // }
                 const dom = new JSDOM(data);
                 const document = dom.window.document;
-                const table = document.querySelector('.ft table')
-
-                const locationRow = Array.from(table.querySelectorAll('tr')).findIndex(row => {
+                const tbody = document.querySelector('.ft table tbody')
+                console.log(tbody.outerHTML + "\n\n")
+                const locationRow = Array.from(tbody.querySelectorAll('tr')).findIndex(row => {
                     const th = row.querySelector('.th');
-                    return th && th.textContent.trim() === '归属地'; document.querySelector("body > div.wrapper > div.container > div:nth-child(1) > div > div.ft > table > tbody > tr:nth-child(2) > td.th")
+                    return th && th.textContent.trim() === '归属地';
                 });
 
                 if (locationRow) {
-                    const locationContent = table.querySelector(`tbody > tr:nth-child(${locationRow + 1}) > td:nth-child(2) > span`).textContent.trim()
-                    if (locationContent) {
-                        console.log(`${ipAddress.addressMinusSuffix}归属地:${locationContent}`);
-                        return locationContent.split(' ')
-                    } else {
-                        console.log('未找到归属地的第二列内容');
+                    const span = tbody.querySelector(`tbody > tr:nth-child(${locationRow + 1}) > td:nth-child(2) > span`)
+                    if (span) {
+                        console.log(span.outerHTML + "\n\n")
+                        const locationContent = span.textContent.trim()
+                        if (locationContent) {
+                            console.log(`${ipAddress.addressMinusSuffix}归属地:${locationContent}`);
+                            return locationContent.split(' ')
+                        }
                     }
+                    console.log('未找到归属地的第二列内容');
                 } else {
                     console.log('未找到归属地' + ipAddress.addressMinusSuffix);
                 }
