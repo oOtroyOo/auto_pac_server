@@ -23,6 +23,8 @@
     "postject": "*"
   },
   "dependencies": {
+    "ip-address": "*",
+    "jsdom": "*",
     "koa": "*",
     "koa-body": "*",
     "koa-cache-control": "*",
