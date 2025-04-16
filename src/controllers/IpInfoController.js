@@ -112,10 +112,15 @@ export default class IpInfoController extends BaseController {
     async getInfoByRequest(ctx) {
         let querystring = ctx.querystring
         if (!querystring) {
-            if (ip.isV4Format(ctx.request.ip)) {
-                querystring = ctx.request.ip
-            } else {
-                let ipAddress = new ipaddress.Address6(ctx.request.ip)
+            querystring = ctx.request.ip
+            // 如果使用了代理，那么可以通过以下方式获取真实 IP
+            const xForwardedFor = ctx.request.header['x-forwarded-for'];
+            if (xForwardedFor) {
+                querystring = xForwardedFor.split(',')[0];
+            }
+
+            if (!ip.isV4Format(querystring)) {
+                let ipAddress = new ipaddress.Address6(querystring)
                 if (ipAddress.is4()) {
                     querystring = ipAddress.to4().addressMinusSuffix
                 } else {
@@ -146,6 +151,7 @@ export default class IpInfoController extends BaseController {
                 return ip.isEqual(ipAddress.addressMinusSuffix, addr.addressMinusSuffix)
                     || ipAddress.mask(addr.subnetMask) === addr.mask(addr.subnetMask)
             })) {
+            console.log("Find is local IP")
             if (ip.isV4Format(requestIp)) {
                 ipAddress = this.publicV4
             } else {
