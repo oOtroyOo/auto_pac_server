@@ -1,4 +1,5 @@
 ﻿import BaseController from './BaseController.js'
+import Koa from 'koa';
 
 export default class EchoController extends BaseController {
 
@@ -8,7 +9,7 @@ export default class EchoController extends BaseController {
      */
     async request(ctx, next) {
         var request = ctx.request;
-        var content = "Hello World";
+        var content = "Hello !!! ";
         if (request.url.indexOf('?') > 0) {
             content += request.url.substring(request.url.indexOf('?') + 1);
         }

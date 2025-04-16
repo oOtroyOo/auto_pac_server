@@ -78,7 +78,8 @@ app.use(async (ctx, next) => {
     if (encoding && encoding.length > 0) {
     }
 
-    ctx.response.set('Content-Type', 'text/plain; charset=utf-8')
+    // ctx.response.set('Content-Type', 'text/plain; charset=utf-8')
+    ctx.type = "text/plain";
     await next()
 })
 
