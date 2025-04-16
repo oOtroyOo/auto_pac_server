@@ -34,6 +34,9 @@ export default class IpInfoController extends BaseController {
      * @param {Koa.Next} next 
      */
     async request(ctx, next) {
+        if (this.wait) {
+            await this.wait
+        }
         let ipInfo = await this.getInfoByRequest(ctx)
         ctx.body = ipInfo
         await super.request(ctx, next)
@@ -120,10 +123,15 @@ export default class IpInfoController extends BaseController {
                 }
             }
         }
+        console.log('querystring = ' + querystring)
         return await this.getInfo(querystring)
     }
 
     async getInfo(requestIp) {
+
+        if (this.wait) {
+            await this.wait
+        }
 
         let ipAddress
         if (ip.isV4Format(requestIp)) {
@@ -144,7 +152,7 @@ export default class IpInfoController extends BaseController {
                 ipAddress = this.publicV6
             }
         }
-        console.log('request address ' + ipAddress.addressMinusSuffix)
+        console.log(ipAddress)
         try {
             let url = 'https://www.ipshudi.com/' + ipAddress.addressMinusSuffix + '.htm'
             const response = await fetch(url)

@@ -43,6 +43,13 @@ app.use(async (ctx, next) => {
 
     try {
         console.log('start ' + ctx.method + ":" + ctx.URL + " ip=" + ctx.request.ip);
+
+        // 如果使用了代理，那么可以通过以下方式获取真实 IP
+        const xForwardedFor = ctx.request.header['x-forwarded-for'];
+        if (xForwardedFor) {
+            console.log('x-forwarded-for: ' + xForwardedFor);
+        }
+
         await next(); // 插入等待后续接口
     } catch (e) {
         ctx.status = 500
