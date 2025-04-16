@@ -6,6 +6,7 @@ import Koa from 'koa';
 import { File } from 'buffer';
 import fs from 'fs/promises'
 import { JSDOM } from 'jsdom';
+import { log } from 'console';
 export default class IpInfoController extends BaseController {
 
     static localIps = []
@@ -138,8 +139,10 @@ export default class IpInfoController extends BaseController {
                 ipAddress = new ipaddress.Address6(address)
             }
         }
+        console.log('request address ' + ipAddress.addressMinusSuffix)
         try {
             const response = await fetch(`https://www.ipshudi.com/${ipAddress.addressMinusSuffix}.htm`)
+            console.log(response.url + " : " + response.status)
             const data = await response.text();
             if (data) {
                 // const filePath = `./ip_info_${ipAddress.addressMinusSuffix}.html`;
