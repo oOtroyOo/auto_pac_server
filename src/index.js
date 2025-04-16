@@ -42,7 +42,7 @@ const app = new Koa();
 app.use(async (ctx, next) => {
 
     try {
-        console.log('start ' + ctx.method + ":" + ctx.URL);
+        console.log('start ' + ctx.method + ":" + ctx.URL + " ip=" + ctx.request.ip);
         await next(); // 插入等待后续接口
     } catch (e) {
         ctx.status = 500

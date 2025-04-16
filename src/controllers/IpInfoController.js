@@ -175,7 +175,7 @@ export default class IpInfoController extends BaseController {
                 }
             }
         } catch (error) {
-            console.log('Error fetching ipshudi :' + error);
+            console.error('Error fetching ipshudi', error);
         }
     }
 }
