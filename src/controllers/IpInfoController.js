@@ -123,26 +123,32 @@ export default class IpInfoController extends BaseController {
         return await this.getInfo(querystring)
     }
 
-    async getInfo(address) {
+    async getInfo(requestIp) {
 
         let ipAddress
-        if (IpInfoController.localIps.some(localAddress => ip.isEqual(address, localAddress.addressMinusSuffix))) {
-            if (ip.isV4Format(address)) {
+        if (ip.isV4Format(requestIp)) {
+            ipAddress = new ipaddress.Address4(requestIp)
+        } else {
+            ipAddress = new ipaddress.Address6(requestIp)
+        }
+        if (ipAddress.addressMinusSuffix.startsWith("192.168")
+            || ipAddress.addressMinusSuffix === "127.0.0.1"
+            || ipAddress.addressMinusSuffix === "0.0.0.1"
+            || IpInfoController.localIps.some(addr => {
+                return ip.isEqual(ipAddress.addressMinusSuffix, addr.addressMinusSuffix)
+                    || ipAddress.mask(addr.subnetMask) === addr.mask(addr.subnetMask)
+            })) {
+            if (ip.isV4Format(requestIp)) {
                 ipAddress = this.publicV4
             } else {
                 ipAddress = this.publicV6
             }
-        } else {
-            if (ip.isV4Format(address)) {
-                ipAddress = new ipaddress.Address4(address)
-            } else {
-                ipAddress = new ipaddress.Address6(address)
-            }
         }
         console.log('request address ' + ipAddress.addressMinusSuffix)
         try {
-            const response = await fetch(`https://www.ipshudi.com/${ipAddress.addressMinusSuffix}.htm`)
-            console.log(response.url + " : " + response.status)
+            let url = 'https://www.ipshudi.com/' + ipAddress.addressMinusSuffix + '.htm'
+            const response = await fetch(url)
+            console.log(url + " : " + response.status)
             const data = await response.text();
             if (data) {
                 // const filePath = `./ip_info_${ipAddress.addressMinusSuffix}.html`;
@@ -176,6 +182,7 @@ export default class IpInfoController extends BaseController {
             }
         } catch (error) {
             console.error('Error fetching ipshudi', error);
+            throw error
         }
     }
 }
