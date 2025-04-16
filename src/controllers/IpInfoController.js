@@ -44,12 +44,12 @@ export default class IpInfoController extends BaseController {
 
     async myIps() {
 
-        if (IpInfoController.localIps.length > 0) {
-            return IpInfoController.localIps
-        }
-
         if (this.wait) {
             return await this.wait
+        }
+
+        if (IpInfoController.localIps.length > 0) {
+            return IpInfoController.localIps
         }
 
         IpInfoController.localIps.push(new ipaddress.Address4('127.0.0.1/8'))
