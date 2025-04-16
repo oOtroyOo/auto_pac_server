@@ -129,7 +129,12 @@ export default class IpInfoController extends BaseController {
             }
         }
         console.log('querystring = ' + querystring)
-        return await this.getInfo(querystring)
+        let result = await this.getInfo(querystring)
+        if (result) {
+            return result
+        }
+        ctx.status = 403
+        return ""
     }
 
     async getInfo(requestIp) {
@@ -159,10 +164,28 @@ export default class IpInfoController extends BaseController {
             }
         }
         console.log(ipAddress)
+
+        let functions = [
+            // this.ipshudi,
+            this.useragentinfo,
+            // this.openbaidu
+        ]
+
+        for (const fun of functions) {
+            let result = await fun(ipAddress)
+            if (result) {
+                return result
+            }
+        }
+
+        return undefined
+    }
+
+    async ipshudi(ipAddress) {
         try {
             let url = 'https://www.ipshudi.com/' + ipAddress.addressMinusSuffix + '.htm'
             const response = await fetch(url)
-            console.log(url + " : " + response.status)
+            console.log(response.status + " : " + url)
             const data = await response.text();
             if (data) {
                 console.log(data + "\n\n")
@@ -177,30 +200,72 @@ export default class IpInfoController extends BaseController {
                 const dom = new JSDOM(data);
                 const document = dom.window.document;
                 const tbody = document.querySelector('.ft table tbody')
-                console.log(tbody.outerHTML + "\n\n")
-                const locationRow = Array.from(tbody.querySelectorAll('tr')).findIndex(row => {
-                    const th = row.querySelector('.th');
-                    return th && th.textContent.trim() === '归属地';
-                });
+                if (tbody) {
+                    console.log(tbody.outerHTML + "\n\n")
+                    const locationRow = Array.from(tbody.querySelectorAll('tr')).findIndex(row => {
+                        const th = row.querySelector('.th');
+                        return th && th.textContent.trim() === '归属地';
+                    });
 
-                if (locationRow) {
-                    const span = tbody.querySelector(`tbody > tr:nth-child(${locationRow + 1}) > td:nth-child(2) > span`)
-                    if (span) {
-                        console.log(span.outerHTML + "\n\n")
-                        const locationContent = span.textContent.trim()
-                        if (locationContent) {
-                            console.log(`${ipAddress.addressMinusSuffix}归属地:${locationContent}`);
-                            return locationContent.split(' ')
+                    if (locationRow) {
+                        const span = tbody.querySelector(`tbody > tr:nth-child(${locationRow + 1}) > td:nth-child(2) > span`)
+                        if (span) {
+                            console.log(span.outerHTML + "\n\n")
+                            const locationContent = span.textContent.trim()
+                            if (locationContent) {
+                                console.log(`${ipAddress.addressMinusSuffix}归属地:${locationContent}`);
+                                return locationContent.split(' ')
+                            }
                         }
+                        console.log('未找到归属地的第二列内容');
                     }
-                    console.log('未找到归属地的第二列内容');
-                } else {
-                    console.log('未找到归属地' + ipAddress.addressMinusSuffix);
                 }
+                console.log('未找到归属地' + ipAddress.addressMinusSuffix);
             }
         } catch (error) {
             console.error('Error fetching ipshudi', error);
-            throw error
+            // throw error
+        }
+    }
+
+    async openbaidu(ipAddress) {
+        try {
+            let url = `https://opendata.baidu.com/api.php?query=${ipAddress.addressMinusSuffix}&co=&resource_id=6006&oe=utf8`
+            const response = await fetch(url)
+            console.log(response.status + " : " + url)
+            const json = await response.json();
+            console.log(json)
+            if (json && json['data']) {
+                const element = json['data'][0]
+                return [element.location.split(' ')[0]]
+            }
+            console.log('未找到归属地' + ipAddress.addressMinusSuffix);
+        } catch (error) {
+            console.error('Error fetching openbaidu', error);
+        }
+    }
+
+    async useragentinfo(ipAddress) {
+        try {
+            let url = `https://ip.useragentinfo.com/jsonp?ip=${ipAddress.addressMinusSuffix}`
+            const response = await fetch(url)
+            console.log(response.status + " : " + url)
+            const data = await response.text()
+            if (data) {
+                let json = undefined
+                let callback = function (args) {
+                    json = args
+                }
+                eval(data)
+                console.log(json)
+                if (json) {
+                    return [json.country, json.province, json.city]
+                }
+            }
+
+            console.log('未找到归属地' + ipAddress.addressMinusSuffix);
+        } catch (error) {
+            console.error('Error fetching useragentinfo', error);
         }
     }
 }
