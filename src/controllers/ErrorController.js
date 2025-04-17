@@ -11,7 +11,7 @@ export default class ErrorController extends BaseController {
      * @param {Koa.Next} next 
      */
     async request(ctx, next) {
-        undefined(); // This will throw an error
+        throw new Error("This is ERROR") // This will throw an error
         await super.request(ctx, next)
     }
 }

@@ -4,15 +4,11 @@ import koaMount from 'koa-mount';
 import koaConvert from 'koa-convert';
 import koaServeIndex from 'koa-serve-index'
 export default class EchoController extends BaseController {
-    /**
-    @param {Koa} app 
-    @param {koaRouter} router 
-    */
-    constructor(app, router) {
-        super(app, router);
+    init() {
+        super.init()
         /* 文件传递部分 */
         const serveIndexFunc = koaConvert(koaServeIndex('./', { icons: true, view: 'details' }))
-        app.use(koaMount('/file', async (ctx, next) => {
+        this.app.use(koaMount('/file', async (ctx, next) => {
             if (ctx.accept.headers.accept === "*/*") {
                 try {
                     var localPath = path.resolve("." + decodeURIComponent(ctx.path))
@@ -26,7 +22,7 @@ export default class EchoController extends BaseController {
             }
             await serveIndexFunc(ctx, next)
         }));
-        app.use(koaMount('/file', koaStatic('./', {})));
+        this.app.use(koaMount('/file', koaStatic('./', {})));
     }
 
     /**

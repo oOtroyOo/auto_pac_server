@@ -9,16 +9,28 @@ import {
 } from 'timers/promises'; // 默认常用计时方法替换成Async方法
 
 export default class BaseController {
+    /** @type {Koa} */
+    app = undefined
+
+
+    /** @type {koaRouter} */
+    router = undefined
+
     /**
     @param {Koa} app 
     @param {koaRouter} router 
     */
     constructor(app, router) {
-        const name = this.constructor.name.replace('Controller', '').toLowerCase();
-        router.all('/' + name, async (ctx, next) => {
-            await this.request(ctx, next)
-        })
+        this.app = app
+        this.router = router
+        this.init()
     }
+
+    init() {
+        const name = this.constructor.name.replace('Controller', '').toLowerCase();
+        this.router.all('/' + name, (ctx, next) => this.request(ctx, next))
+    }
+
     /**
     @param {Koa.ParameterizedContext<Koa.DefaultState, Koa.DefaultContext, string>} ctx 
     @param {Koa.Next} next 

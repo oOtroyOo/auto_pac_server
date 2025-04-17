@@ -53,7 +53,7 @@ app.use(async (ctx, next) => {
         await next(); // 插入等待后续接口
     } catch (e) {
         ctx.status = 500
-        ctx.body = e.stack
+        ctx.body = `${e.message}\n${e.stack}\n`
         // e.expose = true
         // ctx.onerror(e)
         console.error(`\n${e.stack.replace(/^/gm, '  ')}\n`);
@@ -121,14 +121,15 @@ app.use(async (ctx, next) => {
 
 /* 路由部分 */
 const router = new koaRouter({ strict: true });
-
+global.myControllers = []
 for (let localFile of fs.readdirSync(`${__dirname}/controllers`)) {
     try {
         localFile = `./controllers/${localFile}`
         console.log(localFile)
         const Controller = (await import(localFile)).default;
         if (Controller && typeof Controller === 'function') {
-            new Controller(app, router);
+            let obj = new Controller(app, router);
+            global.myControllers.push(obj)
         }
     } catch (error) {
         console.error(`Failed to load controller from file: ${localFile}`, error);

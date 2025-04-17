@@ -7,6 +7,11 @@ import { File } from 'buffer';
 import fs from 'fs/promises'
 import { JSDOM } from 'jsdom';
 import { log } from 'console';
+import {
+    setTimeout,
+    setImmediate,
+    setInterval,
+} from 'timers/promises'; // 默认常用计时方法替换成Async方法
 export default class IpInfoController extends BaseController {
 
     static localIps = []
@@ -15,20 +20,14 @@ export default class IpInfoController extends BaseController {
     publicV6 = undefined
     locationInfo = undefined
 
-    /**
-    @param {Koa} app 
-    @param {koaRouter} router 
-    */
-    constructor(app, router) {
-        super(app, router)
+    init() {
+        super.init()
+
         this.wait = new Promise(async (resolve, reject) => {
             resolve(await this.myIps())
-        }).then((result) => {
-            this.wait = undefined
-        }, (reason) => {
-            console.log(reason)
-        })
+        }).then((result) => this.wait = undefined)
     }
+
     /**
      * @param {Koa.ParameterizedContext<Koa.DefaultState, Koa.DefaultContext, string>} ctx 
      * @param {Koa.Next} next 
@@ -43,7 +42,7 @@ export default class IpInfoController extends BaseController {
     }
 
     async myIps() {
-
+        await setTimeout(1)
         if (this.wait) {
             return await this.wait
         }
