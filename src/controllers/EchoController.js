@@ -9,7 +9,7 @@ export default class EchoController extends BaseController {
      */
     async request(ctx, next) {
         var request = ctx.request;
-        var content = "Hello !!! ";
+        var content = "Hello World !!! ";
         if (request.url.indexOf('?') > 0) {
             content += request.url.substring(request.url.indexOf('?') + 1);
         }
