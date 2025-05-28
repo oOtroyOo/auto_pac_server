@@ -50,9 +50,11 @@ export default class LfsController extends BaseController {
                 const objPath = this.getObjectPath(project, oid);
                 let exists = false;
                 try {
-                    const stat = await fs.stat(objPath);
+                    const stat = fs.statSync(objPath);
                     exists = stat.size === size;
-                } catch { }
+                } catch (e) {
+                    console.log(e)
+                }
                 const actions = {};
                 const href = `${ctx.origin}${ctx.originalUrl.substring(0, ctx.originalUrl.lastIndexOf('/') + 1)}${oid}`;
                 if (operation === 'download' && exists) {
