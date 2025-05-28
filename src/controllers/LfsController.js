@@ -19,7 +19,7 @@ export default class LfsController extends BaseController {
             if (val.startsWith("--lfs-root")) {
                 var split = val.indexOf('=')
                 if (split > 0) {
-                    port = parseInt(val.substring(split + 1))
+                    this.rootDir = parseInt(val.substring(split + 1))
                 }
             }
         });
