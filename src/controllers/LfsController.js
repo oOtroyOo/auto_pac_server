@@ -20,10 +20,10 @@ export default class LfsController extends BaseController {
         /** @type {koaRouter} */
         this.lfsRouter = new koaRouter({ strict: true });
         // LFS batch API
-        this.lfsRouter.post(`/:project/objects/batch`, async (ctx, next) => await this.batch(ctx, next));
+        this.lfsRouter.post(`/*project/objects/batch`, async (ctx, next) => await this.batch(ctx, next));
         // LFS object upload/download
-        this.lfsRouter.get(`/:project/objects/:oid`, async (ctx, next) => await this.download(ctx, next));
-        this.lfsRouter.put(`/:project/objects/:oid`, async (ctx, next) => await this.upload(ctx, next));
+        this.lfsRouter.get(`/*project/objects/:oid`, async (ctx, next) => await this.download(ctx, next));
+        this.lfsRouter.put(`/*project/objects/:oid`, async (ctx, next) => await this.upload(ctx, next));
     }
 
     /**
@@ -53,10 +53,11 @@ export default class LfsController extends BaseController {
                     const stat = fs.statSync(objPath);
                     exists = stat.size === size;
                 } catch (e) {
-                    console.log(e)
+                    if (e.code != 'ENOENT')
+                        console.log(e)
                 }
                 const actions = {};
-                const href = `${ctx.origin}${ctx.originalUrl.substring(0, ctx.originalUrl.lastIndexOf('/') + 1)}${oid}`;
+                const href = `${ctx.protocol}://${ctx.host}${ctx.originalUrl.substring(0, ctx.originalUrl.lastIndexOf('/') + 1)}${oid}`;
                 if (operation === 'download' && exists) {
                     actions.download = {
                         href: href
