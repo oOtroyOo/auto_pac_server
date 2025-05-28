@@ -3,7 +3,6 @@ import ipaddress from 'ip-address'
 import os from 'os';
 import ip from 'ip';
 import Koa from 'koa';
-import { File } from 'buffer';
 import fs from 'fs/promises'
 import { JSDOM } from 'jsdom';
 import { log } from 'console';
@@ -165,9 +164,9 @@ export default class IpInfoController extends BaseController {
         console.log(ipAddress)
 
         let functions = [
-            // this.ipshudi,
+            this.ipshudi,
             this.useragentinfo,
-            // this.openbaidu
+            this.openbaidu
         ]
 
         for (const fun of functions) {
