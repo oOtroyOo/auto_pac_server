@@ -119,7 +119,11 @@ app.use(cacheControl({
 
 app.use(bodyParser({
     enableTypes: ['json', 'form', 'text', 'xml'],
-    extendTypes: { json: "+json" }
+    extendTypes: { json: "+json" },
+    multipart: true,
+    formLimit: "10mb",
+    jsonLimit: "10mb",
+    textLimit: "10mb"
 }));
 // app.use(koaBody.koaBody({}));
 
