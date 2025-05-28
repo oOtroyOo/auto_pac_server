@@ -36,6 +36,7 @@
     "koa-serve-index": "*",
     "koa-sslify": "*",
     "koa-static": "*",
+    "koa-convert": "*",
     "local-devices": "*",
     "node-fetch": "*",
     "pureimage": "*",
