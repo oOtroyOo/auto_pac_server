@@ -26,6 +26,7 @@
     "jsdom": "*",
     "koa": "*",
     "koa-body": "*",
+    "koa-bodyparser": "*",
     "koa-cache-control": "*",
     "koa-charset": "*",
     "koa-conditional-get": "*",
@@ -37,6 +38,7 @@
     "koa-static": "*",
     "local-devices": "*",
     "node-fetch": "*",
+    "pureimage": "*",
     "wakeup": "*"
   }
 }

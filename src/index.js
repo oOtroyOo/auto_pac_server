@@ -9,6 +9,7 @@ import Koa from 'koa';
 import koaRouter from 'koa-router';
 import koaSslify from 'koa-sslify'
 import koaBody from 'koa-body';
+import bodyParser from 'koa-bodyparser';
 import koaCharset from 'koa-charset';
 import koaETag from 'koa-etag';
 import koaConditional from 'koa-conditional-get';
@@ -96,27 +97,30 @@ app.use(cacheControl({
 }));
 
 
-const bodyEncoding = {
-}
-const bodyParse = koaBody.koaBody({})
-app.use(async (ctx, next) => {
-    const type = ctx.request.header["content-type"];
-    if (type) {
-        const parsedType = contentType.parse(type);
-        if (parsedType && parsedType.parameters.charset) {
-            if (bodyEncoding[parsedType.parameters.charset] == undefined) {
-                bodyEncoding[parsedType.parameters.charset] = koaBody.koaBody({
-                    encoding: parsedType.parameters.charset
-                })
-            }
-            await bodyEncoding[parsedType.parameters.charset](ctx, next)
-            return
-        }
-    }
-    await bodyParse(ctx, next)
-});
+// const bodyEncoding = {
+// }
+// const bodyParse = koaBody.koaBody({})
+// app.use(async (ctx, next) => {
+//     const type = ctx.request.header["content-type"];
+//     if (type) {
+//         const parsedType = contentType.parse(type);
+//         if (parsedType && parsedType.parameters.charset) {
+//             if (bodyEncoding[parsedType.parameters.charset] == undefined) {
+//                 bodyEncoding[parsedType.parameters.charset] = koaBody.koaBody({
+//                     encoding: parsedType.parameters.charset
+//                 })
+//             }
+//             await bodyEncoding[parsedType.parameters.charset](ctx, next)
+//             return
+//         }
+//     }
+//     await bodyParse(ctx, next)
+// });
 
-// app.use(bodyParser());
+app.use(bodyParser({
+    enableTypes: ['json', 'form', 'text', 'xml'],
+    extendTypes: { json: "+json" }
+}));
 // app.use(koaBody.koaBody({}));
 
 /* 路由部分 */
