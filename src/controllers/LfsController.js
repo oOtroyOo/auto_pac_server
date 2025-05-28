@@ -13,6 +13,17 @@ import path from 'path';
 export default class LfsController extends BaseController {
     constructor(app, router) {
         super(app, router);
+        this.rootDir = path.resolve(process.cwd(), 'lfs_objects');
+        process.argv.forEach((val, index) => {
+
+            if (val.startsWith("--lfs-root")) {
+                var split = val.indexOf('=')
+                if (split > 0) {
+                    port = parseInt(val.substring(split + 1))
+                }
+            }
+        });
+        console.log(`lfs-root: ${this.rootDir}`);
         router.use("/lfs", this.lfsRouter.routes(), this.lfsRouter.allowedMethods())
     }
 
@@ -137,7 +148,7 @@ export default class LfsController extends BaseController {
 
     getStorageDir(project) {
         // 按项目分目录
-        const dir = path.resolve(process.cwd(), 'lfs_objects', project);
+        const dir = path.resolve(this.rootDir, project);
         if (!fs.existsSync(dir)) {
             fs.mkdirSync(dir, { recursive: true });
         }
