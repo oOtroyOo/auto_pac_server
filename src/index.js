@@ -117,13 +117,17 @@ app.use(cacheControl({
 //     await bodyParse(ctx, next)
 // });
 
+
+// app.use(koaBody.koaBody({}));
+
+app.use(async (ctx, next) => {
+    if (ctx.path.match('/objects/[a-fA-F0-9]{32,128}$')) ctx.disableBodyParser = true;
+    await next();
+});
 app.use(bodyParser({
     enableTypes: ['json', 'form', 'text', 'xml'],
     extendTypes: { json: "+json" },
     multipart: true,
-    formLimit: "10mb",
-    jsonLimit: "10mb",
-    textLimit: "10mb"
 }));
 // app.use(koaBody.koaBody({}));
 
