@@ -1,0 +1,26 @@
+{
+  "name": "koa-git-lfs-server",
+  "version": "1.0.0",
+  "main": "lfs.js",
+  "scripts": {
+    "test": "node index.js",
+    "build": "node buildSea.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bin": {
+    "koa-git-lfs-server": "./index.js"
+  },
+  "description": "",
+  "devDependencies": {
+    "esbuild": "*"
+  },
+  "dependencies": {
+    "argparse": "^2.0.1",
+    "koa": "^3.0.0",
+    "koa-bodyparser": "^4.0.0",
+    "koa-router": "^13.0.0"
+  }
+}

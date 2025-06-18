@@ -1,7 +1,7 @@
 var PROXY = "SOCKS5 $host$:10809; SOCKS $host$:10809; DIRECT;";
 
 var white = [
-    "store.steampowered.com",
+    // "store.steampowered.com",
     "*.vrchat.com",
     "*.vrchat.cloud"
 ];
@@ -15,7 +15,9 @@ var domains = [
     "akamaihd.net",
     "dmm.co.jp",
     "*.facebook.com",
-    "*.beatsaver.com",    
+    "*.beatsaver.com",  
+    "license.tuanjie.cn",
+    "githubcopilot.com",
     $domains$
 ];
 
