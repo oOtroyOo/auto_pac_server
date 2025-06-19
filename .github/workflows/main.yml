@@ -1,0 +1,83 @@
+﻿name: Cross Platform Build and Release
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '22.x'
+          # cache: 'npm'
+      - run: npm install
+      - run: npm run build
+      - name: Upload Linux artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-build
+          path: bin/*
+          retention-days: 5
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '22.x'
+          # cache: 'npm'
+      - run: npm install
+      - run: npm run build
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-build
+          path: bin/*
+          retention-days: 5
+
+  create-release:
+    needs: [build-linux, build-windows]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      
+      - name: Get latest tag
+        id: previoustag
+        run: |
+          git fetch --tags
+          echo "tag=$(git describe --tags --abbrev=0 2>/dev/null || echo 'v0.0.0')" >> $GITHUB_OUTPUT
+      
+      - name: Create new tag
+        id: newtag
+        run: |
+          current_tag=${{ steps.previoustag.outputs.tag }}
+          new_tag="v$(echo ${current_tag#v} | awk -F. '{$NF+=1; print $1"."$2"."$NF}')"
+          echo "tag=${new_tag}" >> $GITHUB_OUTPUT
+          git tag $new_tag
+          git push origin $new_tag
+      
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: releases
+      
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.newtag.outputs.tag }}
+          files: |
+            releases/linux-build/*
+            releases/windows-build/*
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

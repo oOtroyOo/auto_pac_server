@@ -10,10 +10,7 @@
     ]
   },
   "scripts": {
-    "build-clean": "",
-    "build-esbuild": "esbuild ./src --outfile=./dist/index.js --bundle --platform=node",
-    "build-pkg": "pkg --targets=node18-win-x64 --output=dist/auto-pac.exe --options experimental-modules dist/index.js",
-    "build": "rd /s /q dist 2>nul &npm run build-esbuild &&npm run build-pkg &del dist\\index.js",
+    "build": "node buildSea.js",
     "dev": "node --es-module-specifier-resolution=node src/index.js --input-type=module --port=8880"
   },
   "devDependencies": {
