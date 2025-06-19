@@ -8,7 +8,6 @@ import contentType from 'content-type';
 import Koa from 'koa';
 import koaRouter from 'koa-router';
 import koaSslify from 'koa-sslify'
-import koaBody from 'koa-body';
 import bodyParser from 'koa-bodyparser';
 import koaCharset from 'koa-charset';
 import koaETag from '@koa/etag';
@@ -22,7 +21,6 @@ import {
     setInterval,
 } from 'timers/promises'; // 默认常用计时方法替换成Async方法
 
-exec
 const __filename = url.fileURLToPath(import.meta.url).replaceAll('\\', '/')
 const __dirname = path.dirname(__filename).replaceAll('\\', '/')
 // const __filename = import.meta.filename;

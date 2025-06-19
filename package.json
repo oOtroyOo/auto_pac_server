@@ -22,7 +22,6 @@
     "ip-address": "*",
     "jsdom": "*",
     "koa": "*",
-    "koa-body": "*",
     "koa-bodyparser": "*",
     "koa-cache-control": "*",
     "koa-charset": "*",
