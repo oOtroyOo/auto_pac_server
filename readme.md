@@ -1,5 +1,4 @@
-﻿
-# 使用ES6环境自动pac服务脚本
+﻿# 使用ES6环境自动pac服务脚本
 
   - 自动从[gfwlist](https://github.com/gfwlist/gfwlist)官方配置文件解析地址，生成pac文件
   - 使用nodejs作为服务器，兼容ES6语言
@@ -12,7 +11,11 @@
 ## 可选运行方式
 
 **1. 下载运行软件 exe**
-  下载链接：[![Build status](https://ci.appveyor.com/api/projects/status/vm7a0xamm0t7manv?svg=true&retina=true)](https://ci.appveyor.com/project/oOtroyOo/auto-pac-server/build/artifacts) [![GitHub release (latest by date)](https://img.shields.io/github/v/release/oOtroyOo/auto_pac_server)](https://github.com/oOtroyOo/auto_pac_server/releases/latest)
+  下载链接： 
+
+  [![GitHub release (latest by date)](https://img.shields.io/github/v/release/oOtroyOo/auto_pac_server)](https://github.com/oOtroyOo/auto_pac_server/releases/latest)
+  [![Build Status](https://github.com/oOtroyOo/auto_pac_server/actions/workflows/main.yml/badge.svg)](https://github.com/oOtroyOo/auto_pac_server/actions/workflows/main.yml)
+
 
 **2. 安装 nodejs 运行命令如下**
 
