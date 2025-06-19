@@ -11,7 +11,7 @@ import koaSslify from 'koa-sslify'
 import koaBody from 'koa-body';
 import bodyParser from 'koa-bodyparser';
 import koaCharset from 'koa-charset';
-import koaETag from 'koa-etag';
+import koaETag from '@koa/etag';
 import koaConditional from 'koa-conditional-get';
 import cacheControl from 'koa-cache-control';
 
@@ -20,6 +20,7 @@ import {
     setImmediate,
     setInterval,
 } from 'timers/promises'; // 默认常用计时方法替换成Async方法
+import { exit } from "process";
 
 const __filename = url.fileURLToPath(import.meta.url).replaceAll('\\', '/')
 const __dirname = path.dirname(__filename).replaceAll('\\', '/')
@@ -134,6 +135,8 @@ app.use(bodyParser({
 /* 路由部分 */
 const router = new koaRouter({ strict: true });
 global.myControllers = []
+
+let isError = false
 for (let localFile of fs.readdirSync(`${__dirname}/controllers`)) {
     try {
         localFile = `./controllers/${localFile}`
@@ -145,7 +148,12 @@ for (let localFile of fs.readdirSync(`${__dirname}/controllers`)) {
         }
     } catch (error) {
         console.error(`Failed to load controller from file: ${localFile}`, error);
+        isError = true
     }
+}
+
+if (isError) {
+    exit(1)
 }
 
 app.use(router.routes());

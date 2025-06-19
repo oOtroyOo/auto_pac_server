@@ -1,0 +1,3 @@
+[submodule "koa-local-git-lfs"]
+	path = koa-local-git-lfs
+	url = git@github.com:oOtroyOo/koa-local-git-lfs.git
