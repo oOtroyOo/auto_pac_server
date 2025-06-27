@@ -21,6 +21,9 @@ import {
     setInterval,
 } from 'timers/promises'; // 默认常用计时方法替换成Async方法
 
+import events from 'events'
+events.EventEmitter.defaultMaxListeners = 20;
+
 const __filename = url.fileURLToPath(import.meta.url).replaceAll('\\', '/')
 const __dirname = path.dirname(__filename).replaceAll('\\', '/')
 // const __filename = import.meta.filename;
