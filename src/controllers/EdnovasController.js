@@ -22,23 +22,28 @@ export default class EdnovasController extends BaseController {
     async request(ctx, next) {
         const { email, password } = ctx.request.query || {};
 
-
-        const formData = new FormData();
-        formData.append('email', email);
-        formData.append('password', password);
-
-        let any = false
         try {
+            const formData = new FormData();
+            formData.append('email', email);
+            formData.append('password', password);
+
+            let any = false
+
             const fetchPromises = this.urls.map(url =>
                 new Promise(async (resolve, reject) => {
                     try {
-                        console.log(url + "/api/v1/passport/auth/login");
                         let response = await fetch(url + "/api/v1/passport/auth/login", {
                             method: 'POST',
                             body: formData
                         });
                         let result = await response.json();
-                        resolve(result)
+
+                        let getSubscribe = await fetch(url + "/api/v1/user/getSubscribe", {
+                            headers: { "Authorization": result.data.auth_data }
+                        });
+                        let resultGetSubscribe = await getSubscribe.json();
+                        console.log(url);
+                        resolve(resultGetSubscribe)
                     } catch (error) {
                         console.log(`reject ${url} ${error} `);
 
@@ -48,31 +53,61 @@ export default class EdnovasController extends BaseController {
             );
 
 
-            let loginJson = await Promise.any(fetchPromises);
 
-            const subscribePromises = this.urls.map(url =>
+            let loginJson = await Promise.any(fetchPromises).then(resp => resp);
+
+            if (!loginJson) {
+                ctx.status = 400
+                return
+            }
+            let subscribeUrls = this.urls.map(url =>
+                url + "/api/v1/client/subscribe?token=" + loginJson.data.token
+            );
+
+            if (!subscribeUrls.includes(loginJson.data.subscribe_url)) {
+                subscribeUrls.push(loginJson.data.subscribe_url)
+            }
+            const subscribePromises = subscribeUrls.map(geturl =>
                 new Promise(async (resolve, reject) => {
                     try {
-                        const geturl = url + "/api/v1/client/subscribe?token=" + loginJson.data.token
-                        console.log(geturl);
                         let response = await fetch(geturl);
                         let result = await response.text();
-                        resolve(result)
+                        console.log(geturl);
+                        resolve({ result: result, header: response.headers });
                     } catch (error) {
-                        console.log(`reject ${url} ${error} `);
+                        console.log(`reject ${geturl} ${error} `);
 
                         reject(error)
                     }
                 })
             );
+            let { result, header } = await Promise.any(subscribePromises).then(resp => resp);
 
-            let subscribe = await Promise.any(subscribePromises);
-            ctx.body = subscribe;
+            if (result) {
+                ctx.status = 200;
+                for (const [key, value] of header.entries()) {
+                    if (key.toLowerCase() == "Report-To".toLowerCase() ||
+                        key.toLowerCase() == "NEL".toLowerCase() ||
+                        key.toLowerCase() == "Report-To".toLowerCase() ||
+                        key.toLowerCase() == "CF-RAY".toLowerCase() ||
+                        key.toLowerCase() == "cf-cache-status".toLowerCase() ||
+                        key.toLowerCase() == "server-timing".toLowerCase()
+                    ) {
+                        ctx.set(key, value);
+                    }
+                }
+                ctx.body = result;
+                return
+            } else {
+                ctx.status = 502;
+                ctx.body = { success: false, error: 'All requests failed' };
+            }
         } catch (err) {
             ctx.status = 502;
-            ctx.body = { success: false, error: 'All requests failed' };
+            ctx.body = { success: false, error: err };
             return;
+        } finally {
+            await super.request(ctx, next)
         }
-        await super.request(ctx, next)
     }
 }
