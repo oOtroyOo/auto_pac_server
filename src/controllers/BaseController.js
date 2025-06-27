@@ -28,15 +28,7 @@ export default class BaseController {
 
     init() {
         const name = this.constructor.name.replace('Controller', '').toLowerCase();
-        this.router.all('/' + name, async (ctx, next) => {
-            try {
-                await this.request(ctx, next)
-            } catch (e) {
-                ctx.status = 500
-                ctx.body = `${e.message}\n${e.stack}\n`
-                console.error(`\n${e.stack.replace(/^/gm, '  ')}\n`);
-            }
-        })
+        this.router.all('/' + name, async (ctx, next) => await this.request(ctx, next))
     }
 
     /**

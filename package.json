@@ -19,6 +19,8 @@
     "postject": "*"
   },
   "dependencies": {
+    "@koa/etag": "*",
+    "axios": "^1.10.0",
     "ip-address": "*",
     "jsdom": "*",
     "koa": "*",
@@ -26,17 +28,16 @@
     "koa-cache-control": "*",
     "koa-charset": "*",
     "koa-conditional-get": "*",
-    "@koa/etag": "*",
+    "koa-convert": "*",
+    "koa-local-git-lfs": "file:./koa-local-git-lfs",
     "koa-mount": "*",
     "koa-router": "*",
     "koa-serve-index": "*",
     "koa-sslify": "*",
     "koa-static": "*",
-    "koa-convert": "*",
     "local-devices": "*",
     "node-fetch": "*",
     "pureimage": "*",
-    "koa-local-git-lfs":"file:./koa-local-git-lfs",
-    "wakeup": "*" 
+    "wakeup": "*"
   }
 }
