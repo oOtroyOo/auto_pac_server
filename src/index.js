@@ -40,6 +40,7 @@ process.argv.forEach((val, index) => {
     }
 });
 
+
 const app = new Koa();
 
 /* 大try中间件 */
@@ -136,6 +137,13 @@ app.use(bodyParser({
 
 /* 路由部分 */
 const router = new koaRouter({ strict: true });
+
+if (process.env['FC_CUSTOM_LISTEN_PORT']) {
+    port = parseInt(process.env['FC_CUSTOM_LISTEN_PORT'])
+    router.prefix('/node');
+}
+
+
 global.myControllers = []
 
 let isError = false
@@ -157,7 +165,6 @@ for (let localFile of fs.readdirSync(`${__dirname}/controllers`)) {
 if (isError) {
     process.exit(1)
 }
-
 app.use(router.routes());
 app.use(router.allowedMethods());
 
