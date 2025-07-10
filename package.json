@@ -31,7 +31,7 @@
     "koa-convert": "*",
     "koa-local-git-lfs": "file:./koa-local-git-lfs",
     "koa-mount": "*",
-    "koa-router": "*",
+    "koa-router": "13.0.1",
     "koa-serve-index": "*",
     "koa-sslify": "*",
     "koa-static": "*",
