@@ -44,8 +44,8 @@ export default class QCController extends BaseController {
         }
 
         if (urlMap[quickConnectID] != null) {
-            let hostUrl = URL.parse(urlMap[quickConnectID])
-            let resultUrl = hostUrl.protocol + "//" + hostUrl.host + ctx.url.substring(this.router.opts.prefix.length + '/qc/'.length + quickConnectID.length)
+            let hostUrl = new URL(urlMap[quickConnectID])
+            let resultUrl = hostUrl.protocol + "//" + hostUrl.host + ctx.url.substring((this.router.opts.prefix?.length ?? 0) + '/qc/'.length + quickConnectID.length)
             ctx.status = 308
             ctx.response.set("Location", resultUrl)
 
