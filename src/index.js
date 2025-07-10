@@ -4,7 +4,6 @@ import https from "https"
 import path from 'path';
 import tls from 'tls';
 import fs from "fs";
-import contentType from 'content-type';
 import Koa from 'koa';
 import koaRouter from 'koa-router';
 import koaSslify from 'koa-sslify'
@@ -13,7 +12,6 @@ import koaCharset from 'koa-charset';
 import koaETag from '@koa/etag';
 import koaConditional from 'koa-conditional-get';
 import cacheControl from 'koa-cache-control';
-import LfsController from './controllers/LfsController.js';
 
 import {
     setTimeout,
@@ -61,7 +59,7 @@ app.use(async (ctx, next) => {
         ctx.body = `${e.message}\n${e.stack}\n`
         // e.expose = true
         // ctx.onerror(e)
-        console.error(`\n${e.stack.replace(/^/gm, '  ')}\n`);
+        console.error(`\n${e.stack != null ? e.stack.replace(/^/gm, '  ') : e}\n`);
     } finally {
         console.log('end ' + ctx.method + ":" + ctx.URL);
     }
