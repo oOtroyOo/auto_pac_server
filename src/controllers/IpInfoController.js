@@ -41,11 +41,10 @@ export default class IpInfoController extends BaseController {
     }
 
     async myIps() {
-        await setTimeout(1)
         if (this.wait) {
             return await this.wait
         }
-
+        await setTimeout(1)
         if (IpInfoController.localIps.length > 0) {
             return IpInfoController.localIps
         }
