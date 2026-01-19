@@ -135,12 +135,12 @@ app.use(bodyParser({
 
 /* 路由部分 */
 const router = new koaRouter({ strict: true });
+const routerWithPrefix = new koaRouter({ strict: true });
+routerWithPrefix.prefix('/node');
 
 if (process.env['FC_CUSTOM_LISTEN_PORT']) {
     port = parseInt(process.env['FC_CUSTOM_LISTEN_PORT'])
-    router.prefix('/node');
 }
-
 
 global.myControllers = []
 
@@ -163,8 +163,14 @@ for (let localFile of fs.readdirSync(`${__dirname}/controllers`)) {
 if (isError) {
     process.exit(1)
 }
+// 将 router 的所有路由复制到 routerWithPrefix
+for (let route of router.stack) {
+    routerWithPrefix.register(route.path, route.methods, route.stack, { ...route.opts, prefix: routerWithPrefix.opts.prefix })
+}
 app.use(router.routes());
+app.use(routerWithPrefix.routes());
 app.use(router.allowedMethods());
+app.use(routerWithPrefix.allowedMethods());
 
 try {
     const certs = {}
