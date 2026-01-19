@@ -28,6 +28,7 @@ export default class BaseController {
 
     init() {
         const name = this.constructor.name.replace('Controller', '').toLowerCase();
+        console.log("ControllerInit : /" + name)
         this.router.all('/' + name, async (ctx, next) => await this.request(ctx, next))
     }
 
