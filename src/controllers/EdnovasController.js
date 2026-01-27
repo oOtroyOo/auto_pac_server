@@ -7,23 +7,23 @@ export default class EdnovasController extends BaseController {
 
     allowed_domains = [
         "cdn.ednovas.tech",
-        // "new.ednovas.org",
-        // "cdn.nmsl.sb",
-        // "new.nmsl.sb",
-        // "new.ednovas.world",
-        // "new.ednovas.blog",
-        // "se.av.com.se",
-        // "se.av.bingo",
-        // "1.ednovas.org",
-        // "new.ednovas.dev",
-        // "cdn.ednovas.dev",
-        // "cdn.ednovas.world",
-        // "cdn.ednovas.org",
-        // "ednovas.world",
-        // "ednovas.dev",
-        // "cdn.ednovas.me",
-        // "ednovas.org",
-        // "ednovas.tech"
+        "new.ednovas.org",
+        "cdn.nmsl.sb",
+        "new.nmsl.sb",
+        "new.ednovas.world",
+        "new.ednovas.blog",
+        "se.av.com.se",
+        "se.av.bingo",
+        "1.ednovas.org",
+        "new.ednovas.dev",
+        "cdn.ednovas.dev",
+        "cdn.ednovas.world",
+        "cdn.ednovas.org",
+        "ednovas.world",
+        "ednovas.dev",
+        "cdn.ednovas.me",
+        "ednovas.org",
+        "ednovas.tech"
     ]
 
     /**
@@ -62,7 +62,7 @@ export default class EdnovasController extends BaseController {
 
                             });
                             console.log(url);
-                            resolve({ result:  getSubscribe.data, header: response.headers })
+                            resolve({ result: getSubscribe.data, header: response.headers })
                         }
                         else {
                             reject(`reject ${url} Login failed`)
