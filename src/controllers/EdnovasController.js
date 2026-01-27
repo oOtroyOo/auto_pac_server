@@ -4,15 +4,26 @@ import axios from 'axios';
 
 // http://127.0.0.1:8880/ednovas?email={{email}}&password={{password}}
 export default class EdnovasController extends BaseController {
-    urls = [
-        "https://new.ednovas.org",
-        "https://new.ednovas.dev",
-        "https://ednovas.tech",
-        "https://ednovas.world",
-        "https://ednovas.dev",
-        "https://cdn.ednovas.tech",
-        "https://cdn.ednovas.world",
-        "https://cdn.ednovas.org",
+
+    allowed_domains = [
+        "cdn.ednovas.tech",
+        // "new.ednovas.org",
+        // "cdn.nmsl.sb",
+        // "new.nmsl.sb",
+        // "new.ednovas.world",
+        // "new.ednovas.blog",
+        // "se.av.com.se",
+        // "se.av.bingo",
+        // "1.ednovas.org",
+        // "new.ednovas.dev",
+        // "cdn.ednovas.dev",
+        // "cdn.ednovas.world",
+        // "cdn.ednovas.org",
+        // "ednovas.world",
+        // "ednovas.dev",
+        // "cdn.ednovas.me",
+        // "ednovas.org",
+        // "ednovas.tech"
     ]
 
     /**
@@ -27,23 +38,35 @@ export default class EdnovasController extends BaseController {
             formData.append('email', email);
             formData.append('password', password);
 
-            let any = false
 
-            const fetchPromises = this.urls.map(url =>
+            const fetchPromises = this.allowed_domains.map(url =>
                 new Promise(async (resolve, reject) => {
                     try {
-                        let response = await axios.postForm(url + "/api/v1/passport/auth/login", formData, {
-                            timeout: 2000
+                        let response = await axios.postForm(`https://${url}/api/v1/passport/auth/login`, formData, {
+                            timeout: 3000
                         });
                         let result = response.data;
 
-                        let getSubscribe = await axios.get(url + "/api/v1/user/getSubscribe", {
-                            headers: { "Authorization": result.data.auth_data },
-                            timeout: 2000
-                        });
-                        let resultGetSubscribe = getSubscribe.data;
-                        console.log(url);
-                        resolve(resultGetSubscribe)
+                        if (result.data.auth_data) {
+                            console.log(`${url} login success auth_data: ${result.data.auth_data}`);
+                            const data = {
+                                "flag": "clash"
+                            }
+                            let getSubscribe = await axios.post(`https://${url}/api/v1/user/downloadConfig`, data, {
+                                headers: {
+                                    "Authorization": result.data.auth_data,
+                                    "Origin": `https://${url}`,
+                                    "Content-Type": "application/json"
+                                },
+                                // timeout: 2000,
+
+                            });
+                            console.log(url);
+                            resolve({ result:  getSubscribe.data, header: response.headers })
+                        }
+                        else {
+                            reject(`reject ${url} Login failed`)
+                        }
                     } catch (error) {
                         console.log(`reject ${url} ${error} `);
 
@@ -52,38 +75,7 @@ export default class EdnovasController extends BaseController {
                 })
             );
 
-
-
-            let loginJson = await this.waitAnySuccess(fetchPromises);
-
-            if (!loginJson) {
-                ctx.status = 400
-                return
-            }
-            let subscribeUrls = this.urls.map(url =>
-                url + "/api/v1/client/subscribe?token=" + loginJson.data.token
-            );
-
-            if (!subscribeUrls.includes(loginJson.data.subscribe_url)) {
-                subscribeUrls.push(loginJson.data.subscribe_url)
-            }
-            const subscribePromises = subscribeUrls.map(geturl =>
-                new Promise(async (resolve, reject) => {
-                    try {
-                        let response = await axios.get(geturl, {
-                            timeout: 2000
-                        });
-                        let result = response.data;
-                        console.log(geturl);
-                        resolve({ result: result, header: response.headers });
-                    } catch (error) {
-                        console.log(`reject ${geturl} ${error} `);
-
-                        reject(error)
-                    }
-                })
-            );
-            let { result, header } = await this.waitAnySuccess(subscribePromises);
+            const { result, header } = await this.waitAnySuccess(fetchPromises);
 
             if (result) {
                 ctx.status = 200;
