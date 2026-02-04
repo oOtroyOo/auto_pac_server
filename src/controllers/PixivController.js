@@ -34,10 +34,14 @@ export default class PixivController extends BaseController {
     /** @type {PixivApi} */
     pixivApi = undefined
 
-    bookmarks = {}
+    bookmarks = undefined
 
     init() {
         this.config = PixivFunc.readConfig()
+        if (!this.config.proxy) {
+            this.config.proxy = global.proxyUrl
+            PixivFunc.writeConfig(this.config)
+        }
         this.pixivFunc = new PixivFunc()
 
         PixivFunc.applyProxyConfig()
@@ -52,6 +56,8 @@ export default class PixivController extends BaseController {
         if (!this.pixivApi) {
             if (process.env["PIXIV_TOKEN"]) {
                 console.log("Pixiv 环境Token " + process.env["PIXIV_TOKEN"])
+                this.config.refresh_token = process.env["PIXIV_TOKEN"]
+                PixivFunc.writeConfig(this.config)
                 await PixivFunc.loginByToken(process.env["PIXIV_TOKEN"])
             }
             if (await this.pixivFunc.relogin()) {
@@ -62,7 +68,8 @@ export default class PixivController extends BaseController {
             }
             if (this.pixivFunc.pixiv == null) {
                 console.log("Pixiv 登录失败")
-                ctx.response.status = 400
+                ctx.response.status = 403
+                ctx.response.body = "Pixiv 登录失败"
                 return
             }
             this.pixivApi = this.pixivFunc.pixiv
@@ -102,48 +109,57 @@ export default class PixivController extends BaseController {
         ctx.body = await this.getBookmark(r18, type);
     }
 
-    async getBookmark(r18, type, getLength = 30) {
+    async getBookmark(r18, type, getLength = 100) {
         const auth = this.pixivApi.auth
         const userId = auth["user"]["id"]
         r18 = parseInt(r18 ?? 0)
 
-        const cacheKey = `${type}+${r18}`
-        if (cacheKey in this.bookmarks) {
-            return this.bookmarks[cacheKey]
-        }
-        console.log(`请求收藏 r18=${r18} type=${type}`)
+        if (this.bookmarks == undefined) {
+            console.log(`请求收藏`)
+            this.bookmarks = []
 
-        const result = await this.pixivApi.userBookmarksIllust(userId)
-        if (result.illusts) {
-            result.illusts = this.filterIllusts(result.illusts, r18, type);
+            let max_bookmark_id = undefined
+            while (this.bookmarks.length < getLength) {
 
-            console.log("筛选结果 " + result.illusts.length)
-        }
-        let result1 = result
-        let page = 1
-        while (result.illusts.length < getLength && result1.next_url && page < 5) {
-            page++
-            try {
-                const nextUrl = new URL(result1.next_url)
-                let max_bookmark_id = nextUrl.searchParams.get('max_bookmark_id')
-                if (!max_bookmark_id) break
+                try {
+                    console.log(`请求收藏 lastid ${max_bookmark_id}`)
+                    const result = await this.pixivApi.userBookmarksIllust(userId, {
+                        max_bookmark_id: max_bookmark_id
+                    })
+                    if (result.illusts.length > 0) {
+                        this.bookmarks.push(...result.illusts)
+                    }
 
-                console.log("请求收藏 lastid " + max_bookmark_id)
-                result1 = await this.pixivApi.userBookmarksIllust(userId, {
-                    max_bookmark_id: max_bookmark_id
-                })
-                result1.illusts = this.filterIllusts(result1.illusts, r18, type);
-                if (result1.illusts.length > 0) {
-                    result.illusts.push(...result1.illusts)
-                    console.log("筛选结果 " + result.illusts.length)
+                    max_bookmark_id = undefined
+                    if (result.next_url) {
+                        const nextUrl = new URL(result.next_url)
+                        max_bookmark_id = nextUrl.searchParams.get('max_bookmark_id')
+                    }
+                    if (!max_bookmark_id) break
+
+                    await setTimeout(100)
+                } catch (error) {
+                    console.log(error)
+                    break
                 }
-            } catch (error) {
-                console.log(error)
-                break
             }
+
+            console.log(`收藏数量 ${this.bookmarks.length}`)
         }
-        this.bookmarks[cacheKey] = result
-        return result
+
+
+
+
+
+        if (this.bookmarks) {
+            console.log(`筛选收藏 r18=${r18} type=${type}`)
+            const ret = { illusts: this.filterIllusts(this.bookmarks, r18, type) };
+
+            console.log("筛选结果 " + ret.illusts.length)
+            return ret
+        }
+
+        return this.bookmarks
     }
 
     filterIllusts(illusts, r18, type) {
@@ -161,7 +177,11 @@ export default class PixivController extends BaseController {
     async random(ctx) {
         const r18 = ctx.request.query.r18
         const type = ctx.request.query.type //   ugoira
-        const quality = ctx.request.query.quality ?? 'medium'
+        const quality = ctx.request.query.quality ?? 'large' //
+        // large
+        // medium
+        // original
+        // square_medium 
         const result = await this.getBookmark(r18, type);
 
         const keys = Object.keys(result.illusts).map(Number);
@@ -182,16 +202,33 @@ export default class PixivController extends BaseController {
                 continue
             }
         }
+        let o = {}
+        Object.entries(detail.illust.meta_single_page).shift()
 
         if (detail) {
+            console.log(detail)
             console.log(detail.illust.id)
-            let uri = undefined
+            let image_urls = undefined
             if (detail.illust.meta_pages.length > 0) {
                 const page = detail.illust.meta_pages[randomInt(detail.illust.meta_pages.length)]
-                uri = new URL(page.image_urls[quality])
+                image_urls = page.image_urls
+            } else if (detail.illust.meta_single_page && Object.entries(detail.illust.meta_single_page).length > 0) {
+                image_urls = {}
+                image_urls[quality] = Object.values(detail.illust.meta_single_page)[0]
             } else {
-                uri = new URL(detail.illust.image_urls[quality])
+                image_urls = detail.illust.image_urls
             }
+
+            let uri
+            if (image_urls) {
+                for (const k in image_urls) {
+                    uri = new URL(image_urls[k])
+                    if (k === quality) {
+                        break
+                    }
+                }
+            }
+
             if (uri) {
                 uri.host = 'i.pixiv.ddns-ip.net'
                 ctx.redirect(uri.toString())
