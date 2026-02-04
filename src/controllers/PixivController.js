@@ -79,7 +79,7 @@ export default class PixivController extends BaseController {
       */
     async ranking(ctx) {
 
-        const result = await this.pixivApi.illustRanking({ mode: ctx.request.query.mode })
+        const result = await this.pixivApi.illustRanking({ mode: ctx.request.query.mode, offset:ctx.request.query.offset })
         ctx.body = result
     }
 
