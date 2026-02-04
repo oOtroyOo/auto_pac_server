@@ -22,7 +22,7 @@
     "@koa/etag": "*",
     "axios": "^1.10.0",
     "ip-address": "*",
-    "jsdom": "*",
+    "jsdom": "^21.1.0",
     "koa": "*",
     "koa-bodyparser": "*",
     "koa-cache-control": "*",

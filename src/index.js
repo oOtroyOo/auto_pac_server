@@ -19,6 +19,7 @@ import {
     setInterval,
 } from 'timers/promises'; // 默认常用计时方法替换成Async方法
 
+console.log("Node:v" + process.version)
 import events from 'events'
 events.EventEmitter.defaultMaxListeners = 20;
 
