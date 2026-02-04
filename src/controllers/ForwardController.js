@@ -34,7 +34,7 @@ export default class ForwardController extends BaseController {
                 rejectUnauthorized: false,
                 getProxyForUrl: (targetUrl) => {
 
-                    const url = URL.parse(targetUrl)
+                    const url = new URL(targetUrl)
                     for (const match of NeedProxyUrl) {
                         if (match.test(url.host)) {
                             try {
@@ -62,7 +62,7 @@ export default class ForwardController extends BaseController {
      * @param {Koa.Next} next 
      */
     async request(ctx, next) {
-        const url = URL.parse("https://" + ctx.params.url)
+        const url = new URL("https://" + ctx.params.url)
 
         const headers = ctx.request.headers
         if (!headers['accept-language']) {

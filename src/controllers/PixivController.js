@@ -49,7 +49,7 @@ export default class PixivController extends BaseController {
         if (!this.pixivApi) {
             if (process.env["PIXIV_TOKEN"]) {
                 console.log("Pixiv 环境Token " + process.env["PIXIV_TOKEN"])
-                PixivFunc.loginByToken(process.env["PIXIV_TOKEN"])
+                await PixivFunc.loginByToken(process.env["PIXIV_TOKEN"])
             }
             if (await this.pixivFunc.relogin()) {
                 this.config = PixivFunc.readConfig()
@@ -79,7 +79,7 @@ export default class PixivController extends BaseController {
       */
     async ranking(ctx) {
 
-        const result = await this.pixivApi.illustRanking({ mode: ctx.request.query.mode, offset:ctx.request.query.offset })
+        const result = await this.pixivApi.illustRanking({ mode: ctx.request.query.mode, offset: ctx.request.query.offset })
         ctx.body = result
     }
 
