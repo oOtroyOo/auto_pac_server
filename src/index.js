@@ -42,11 +42,10 @@ process.argv.forEach((val, index) => {
 
 
 const proxyPort = 10809
-
-const result = child_process.execSync(`cmd /c netstat -ano | findstr 0.0.0.0:${proxyPort}`, {
-    encoding: 'ascii'
-})
 if (process.platform.indexOf("win") >= 0) {
+    const result = child_process.execSync(`cmd /c netstat -ano | findstr 0.0.0.0:${proxyPort}`, {
+        encoding: 'ascii'
+    })
     if (result.trim().length > 0 && result.indexOf("LISTENING") >= 0)
         global.proxyUrl = `http://localhost:${proxyPort}`;
 }
