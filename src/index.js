@@ -3,7 +3,7 @@ import url from "url"
 import https from "https"
 import path from 'path';
 import tls from 'tls';
-import fs from "fs";
+import fs, { glob } from "fs";
 import Koa from 'koa';
 import koaRouter from 'koa-router';
 import koaSslify from 'koa-sslify'
@@ -12,6 +12,7 @@ import koaCharset from 'koa-charset';
 import koaETag from '@koa/etag';
 import koaConditional from 'koa-conditional-get';
 import cacheControl from 'koa-cache-control';
+import * as child_process from 'child_process'
 
 import {
     setTimeout,
@@ -38,6 +39,17 @@ process.argv.forEach((val, index) => {
         }
     }
 });
+
+
+const proxyPort = 10809
+
+const result = child_process.execSync(`cmd /c netstat -ano | findstr 0.0.0.0:${proxyPort}`, {
+    encoding: 'ascii'
+})
+if (process.platform.indexOf("win") >= 0) {
+    if (result.trim().length > 0 && result.indexOf("LISTENING") >= 0)
+        global.proxyUrl = `http://localhost:${proxyPort}`;
+}
 
 
 const app = new Koa();

@@ -3,7 +3,6 @@ import Koa from 'koa';
 import BaseController from './BaseController.js';
 import koaRouter from 'koa-router';
 import { ProxyAgent } from 'proxy-agent';
-import * as child_process from 'child_process'
 import {
     setTimeout,
     setImmediate,
@@ -22,7 +21,6 @@ const NeedProxyUrl = [
 const RefererMap = [
     [/.*\.pximg\.net$/, "https://www.pixiv.net/"]
 ]
-const proxyPort = "10809"
 export default class ForwardController extends BaseController {
 
 
@@ -38,13 +36,7 @@ export default class ForwardController extends BaseController {
                     for (const match of NeedProxyUrl) {
                         if (match.test(url.host)) {
                             try {
-                                if (process.platform.indexOf("win") >= 0) {
-                                    const result = child_process.execSync("cmd /c netstat -ano | findstr 0.0.0.0:10809", {
-                                        encoding: 'ascii'
-                                    })
-                                    if (result.trim().length > 0 && result.indexOf("LISTENING") >= 0)
-                                        return `http://localhost:${proxyPort}`;
-                                }
+                                return global.proxyUrl;
                             } catch (error) {
                                 console.log(error)
                             }

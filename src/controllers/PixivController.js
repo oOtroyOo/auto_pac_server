@@ -10,6 +10,7 @@ import {
 
 } from 'timers/promises'; // 默认常用计时方法替换成Async方法
 import { URL } from 'url';
+import { randomInt } from 'crypto';
 
 const _Modes = [
     "day",
@@ -32,6 +33,8 @@ export default class PixivController extends BaseController {
     pixivFunc = new PixivFunc()
     /** @type {PixivApi} */
     pixivApi = undefined
+
+    bookmarks = {}
 
     init() {
         this.config = PixivFunc.readConfig()
@@ -80,6 +83,7 @@ export default class PixivController extends BaseController {
 
     /**
       * @param {Koa.ParameterizedContext<Koa.DefaultState, Koa.DefaultContext, string>} ctx 
+      * localhost:8880/pixiv/ranking?mode=week_r18
       */
     async ranking(ctx) {
 
@@ -88,13 +92,25 @@ export default class PixivController extends BaseController {
     }
     /**
       * @param {Koa.ParameterizedContext<Koa.DefaultState, Koa.DefaultContext, string>} ctx 
+      * localhost:8880/pixiv/bookmark?r18=2&type=ugoira
       */
     async bookmark(ctx) {
-        const auth = this.pixivApi.auth
-        const userId = auth["user"]["id"]
+
         var r18 = ctx.request.query.r18
         var type = ctx.request.query.type //   ugoira
 
+        ctx.body = await this.getBookmark(r18, type);
+    }
+
+    async getBookmark(r18, type, getLength = 30) {
+        const auth = this.pixivApi.auth
+        const userId = auth["user"]["id"]
+        r18 = parseInt(r18 ?? 0)
+
+        const cacheKey = `${type}+${r18}`
+        if (cacheKey in this.bookmarks) {
+            return this.bookmarks[cacheKey]
+        }
         console.log(`请求收藏 r18=${r18} type=${type}`)
 
         const result = await this.pixivApi.userBookmarksIllust(userId)
@@ -105,7 +121,7 @@ export default class PixivController extends BaseController {
         }
         let result1 = result
         let page = 1
-        while (result.illusts.length < 30 && result1.next_url && page < 5) {
+        while (result.illusts.length < getLength && result1.next_url && page < 5) {
             page++
             try {
                 const nextUrl = new URL(result1.next_url)
@@ -126,13 +142,62 @@ export default class PixivController extends BaseController {
                 break
             }
         }
-        ctx.body = result
+        this.bookmarks[cacheKey] = result
+        return result
     }
 
     filterIllusts(illusts, r18, type) {
-        r18 = parseInt(r18 || 0)
+        r18 = parseInt(r18 ?? 0)
         return illusts.filter(illust => {
             return (illust.x_restrict === r18 || r18 == 2) && (type == undefined || illust.type === type)
         })
+    }
+
+
+    /**
+    * @param {Koa.ParameterizedContext<Koa.DefaultState, Koa.DefaultContext, string>} ctx 
+    * localhost:8880/pixiv/random?r18=0&type=illust&quality=large
+    */
+    async random(ctx) {
+        const r18 = ctx.request.query.r18
+        const type = ctx.request.query.type //   ugoira
+        const quality = ctx.request.query.quality ?? 'medium'
+        const result = await this.getBookmark(r18, type);
+
+        const keys = Object.keys(result.illusts).map(Number);
+        for (let i = keys.length - 1; i > 0; i--) {
+            const j = randomInt(i + 1);
+            [keys[i], keys[j]] = [keys[j], keys[i]];
+        }
+
+        let detail = undefined
+        while (keys.length > 0) {
+            const illust = result.illusts[keys.shift()]
+            try {
+                detail = await this.pixivApi.illustDetail(illust.id)
+                break
+            } catch (error) {
+                console.log(illust.id)
+                console.log(error)
+                continue
+            }
+        }
+
+        if (detail) {
+            console.log(detail.illust.id)
+            let uri = undefined
+            if (detail.illust.meta_pages.length > 0) {
+                const page = detail.illust.meta_pages[randomInt(detail.illust.meta_pages.length)]
+                uri = new URL(page.image_urls[quality])
+            } else {
+                uri = new URL(detail.illust.image_urls[quality])
+            }
+            if (uri) {
+                uri.host = 'i.pixiv.ddns-ip.net'
+                ctx.redirect(uri.toString())
+                return
+            }
+        }
+
     }
 }
