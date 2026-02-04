@@ -47,9 +47,22 @@ export default class PixivController extends BaseController {
      */
     async request(ctx, next) {
         if (!this.pixivApi) {
-            if (await this.pixivFunc.relogin()) {
-                this.pixivApi = this.pixivFunc.pixiv
+            if (process.env["PIXIV_TOKEN"]) {
+                console.log("Pixiv 环境Token " + process.env["PIXIV_TOKEN"])
+                PixivFunc.loginByToken(process.env["PIXIV_TOKEN"])
             }
+            if (await this.pixivFunc.relogin()) {
+                this.config = PixivFunc.readConfig()
+                console.log("Pixiv 配置Token " + this.config.refresh_token)
+            } else {
+
+            }
+            if (this.pixivFunc.pixiv == null) {
+                console.log("Pixiv 登录失败")
+                ctx.response.status = 400
+                return
+            }
+            this.pixivApi = this.pixivFunc.pixiv
             this.pixivApi.setLanguage("zh-cn")
         }
         if (ctx.params.action && this[ctx.params.action]) {
