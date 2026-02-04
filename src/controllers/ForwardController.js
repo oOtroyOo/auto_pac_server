@@ -75,7 +75,7 @@ export default class ForwardController extends BaseController {
                 break
             }
         }
-
+        console.log("转发Host " + url.host)
         try {
             const response = await this.axios.request({
                 method: ctx.request.method.toLowerCase(),
@@ -88,6 +88,7 @@ export default class ForwardController extends BaseController {
                 decompress: false, // 不解压，原样返回
                 validateStatus: () => true // 允许任何状态码，让客户端处理
             });
+            console.log(`回执结果 ${response.status} ${response.headers.getContentType()} ${response.headers.getContentLength()}`)
 
             ctx.response.status = response.status;
 
@@ -97,7 +98,6 @@ export default class ForwardController extends BaseController {
                     ctx.response.set(key, value);
                 }
             }
-
             // 使用 pipeline 确保流正确传递和错误处理
             if (response.data) {
                 ctx.response.body = response.data;

@@ -9,7 +9,7 @@ import {
     setInterval,
 
 } from 'timers/promises'; // 默认常用计时方法替换成Async方法
-import { type } from 'os';
+import { URL } from 'url';
 
 const _Modes = [
     "day",
@@ -63,6 +63,10 @@ export default class PixivController extends BaseController {
                 return
             }
             this.pixivApi = this.pixivFunc.pixiv
+            if (this.pixivApi.auth.user) {
+                const auth = this.pixivApi.auth
+                console.log(`Hello Pixiv ${auth["user"]["name"]}:${auth["user"]["account"]}(${auth["user"]["id"]})`)
+            }
             this.pixivApi.setLanguage("zh-cn")
         }
         if (ctx.params.action && this[ctx.params.action]) {
@@ -82,8 +86,53 @@ export default class PixivController extends BaseController {
         const result = await this.pixivApi.illustRanking({ mode: ctx.request.query.mode, offset: ctx.request.query.offset })
         ctx.body = result
     }
-
+    /**
+      * @param {Koa.ParameterizedContext<Koa.DefaultState, Koa.DefaultContext, string>} ctx 
+      */
     async bookmark(ctx) {
+        const auth = this.pixivApi.auth
+        const userId = auth["user"]["id"]
+        var r18 = ctx.request.query.r18
+        var type = ctx.request.query.type //   ugoira
 
+        console.log(`请求收藏 r18=${r18} type=${type}`)
+
+        const result = await this.pixivApi.userBookmarksIllust(userId)
+        if (result.illusts) {
+            result.illusts = this.filterIllusts(result.illusts, r18, type);
+
+            console.log("筛选结果 " + result.illusts.length)
+        }
+        let result1 = result
+        let page = 1
+        while (result.illusts.length < 30 && result1.next_url && page < 5) {
+            page++
+            try {
+                const nextUrl = new URL(result1.next_url)
+                let max_bookmark_id = nextUrl.searchParams.get('max_bookmark_id')
+                if (!max_bookmark_id) break
+
+                console.log("请求收藏 lastid " + max_bookmark_id)
+                result1 = await this.pixivApi.userBookmarksIllust(userId, {
+                    max_bookmark_id: max_bookmark_id
+                })
+                result1.illusts = this.filterIllusts(result1.illusts, r18, type);
+                if (result1.illusts.length > 0) {
+                    result.illusts.push(...result1.illusts)
+                    console.log("筛选结果 " + result.illusts.length)
+                }
+            } catch (error) {
+                console.log(error)
+                break
+            }
+        }
+        ctx.body = result
+    }
+
+    filterIllusts(illusts, r18, type) {
+        r18 = parseInt(r18 || 0)
+        return illusts.filter(illust => {
+            return (illust.x_restrict === r18 || r18 == 2) && (type == undefined || illust.type === type)
+        })
     }
 }
