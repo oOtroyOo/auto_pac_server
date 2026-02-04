@@ -36,7 +36,13 @@ export default class LfsController extends BaseController {
         console.log("LFS root folder: " + folder)
 
         if (!fs.existsSync(folder)) {
-            fs.mkdirSync(folder)
+            try {
+                fs.mkdirSync(folder)
+            } catch (error) {
+                console.log("ERROR", error)
+                return
+            }
+
         }
         this.lfs = new koa_local_git_lfs(folder, this.hostBuilder, async (ctx, next) => await this.request(ctx, next))
         // router.use('/lfs/*path',     this.lfs.routes())

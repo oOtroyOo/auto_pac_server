@@ -38,6 +38,7 @@
     "local-devices": "*",
     "node-fetch": "*",
     "pureimage": "*",
+    "pxder": "*",
     "wakeup": "*"
   }
 }

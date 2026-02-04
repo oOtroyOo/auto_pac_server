@@ -1,4 +1,6 @@
+import Koa from 'koa';
 import BaseController from './BaseController.js';
+import koaRouter from 'koa-router';
 import {
     setTimeout,
     setImmediate,
