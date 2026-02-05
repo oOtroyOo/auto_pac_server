@@ -14,13 +14,7 @@ import { pipeline } from 'stream/promises'; // 添加 pipeline 用于流转发
 
 // 过滤并设置响应头
 const skipHeaders = ['transfer-encoding', 'connection', 'keep-alive', 'upgrade'];
-const NeedProxyUrl = [
-    /.*\.pixiv\.net$/,
-    /.*\.pximg\.net$/
-]
-const RefererMap = [
-    [/.*\.pximg\.net$/, "https://www.pixiv.net/"]
-]
+
 export default class ForwardController extends BaseController {
 
 
@@ -33,10 +27,10 @@ export default class ForwardController extends BaseController {
                 getProxyForUrl: (targetUrl) => {
 
                     const url = new URL(targetUrl)
-                    for (const match of NeedProxyUrl) {
+                    for (const match of this.app.MyConfig.NeedProxyUrl) {
                         if (match.test(url.host)) {
                             try {
-                                return global.proxyUrl;
+                                return this.app.MyConfig.proxyUrl;
                             } catch (error) {
                                 console.log(error)
                             }
@@ -61,7 +55,7 @@ export default class ForwardController extends BaseController {
             headers['accept-language'] = 'zh-cn'
         }
         headers.host = url.host
-        for (var list of RefererMap) {
+        for (var list of this.app.MyConfig.RefererMap) {
             if (list[0].test(url.host)) {
                 headers.referer = list[1]
                 break

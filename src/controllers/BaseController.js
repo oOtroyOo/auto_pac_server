@@ -1,6 +1,6 @@
 ﻿import Koa from 'koa';
 import koaRouter from 'koa-router';
-
+import { KoaWithMyInterface } from "../Interfaces/Defines.js"
 import {
     setTimeout,
     setImmediate,
@@ -9,7 +9,7 @@ import {
 } from 'timers/promises'; // 默认常用计时方法替换成Async方法
 
 export default class BaseController {
-    /** @type {Koa} */
+    /** @type {KoaWithMyInterface} */
     app = undefined
 
 
@@ -17,7 +17,7 @@ export default class BaseController {
     router = undefined
 
     /**
-    @param {Koa} app 
+    @param {KoaWithMyInterface} app 
     @param {koaRouter} router 
     */
     constructor(app, router) {

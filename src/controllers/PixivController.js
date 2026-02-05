@@ -11,6 +11,7 @@ import {
 } from 'timers/promises'; // 默认常用计时方法替换成Async方法
 import { URL } from 'url';
 import { randomInt } from 'crypto';
+import fs from 'fs'
 
 const _Modes = [
     "day",
@@ -27,6 +28,22 @@ const _Modes = [
     "week_r18",
     "week_r18g"
 ]
+
+/**
+ * @typedef {Object} FilterDefine
+ * @property {number} r18
+ * @property {string} type
+ * - ugoira
+ * - illust
+ * - manga
+ * @property {string} tag
+ * @property {number} ai 
+ * - 0 = 全部作品（包括 AI）
+ * - 1 = 仅原创（排除 AI）
+ * - 2 = 仅 AI 作品
+ */
+
+
 export default class PixivController extends BaseController {
 
     config = PixivFunc.readConfig()
@@ -35,17 +52,19 @@ export default class PixivController extends BaseController {
     pixivApi = undefined
 
     bookmarks = undefined
+    cdnHost = undefined
 
     init() {
         this.config = PixivFunc.readConfig()
         if (!this.config.proxy) {
-            this.config.proxy = global.proxyUrl
+            this.config.proxy = this.app.MyConfig.proxyUrl
             PixivFunc.writeConfig(this.config)
         }
         this.pixivFunc = new PixivFunc()
 
         PixivFunc.applyProxyConfig()
         super.init()
+
         this.router.all(this.router.stack[this.router.stack.length - 1].path + '/:action', async (ctx, next) => await this.request(ctx, next))
     }
     /**
@@ -54,6 +73,7 @@ export default class PixivController extends BaseController {
      */
     async request(ctx, next) {
         if (!this.pixivApi) {
+
             if (process.env["PIXIV_TOKEN"]) {
                 console.log("Pixiv 环境Token " + process.env["PIXIV_TOKEN"])
                 this.config.refresh_token = process.env["PIXIV_TOKEN"]
@@ -102,17 +122,13 @@ export default class PixivController extends BaseController {
       * localhost:8880/pixiv/bookmark?r18=2&type=ugoira
       */
     async bookmark(ctx) {
-
-        var r18 = ctx.request.query.r18
-        var type = ctx.request.query.type //   ugoira
-
-        ctx.body = await this.getBookmark(r18, type);
+        ctx.body = await this.getBookmark(ctx.request.query);
     }
 
-    async getBookmark(r18, type, getLength = 100) {
+    /** @param {FilterDefine} filterDefine  */
+    async getBookmark(filterDefine, getLength = 200) {
         const auth = this.pixivApi.auth
         const userId = auth["user"]["id"]
-        r18 = parseInt(r18 ?? 0)
 
         if (this.bookmarks == undefined) {
             console.log(`请求收藏`)
@@ -127,7 +143,7 @@ export default class PixivController extends BaseController {
                         max_bookmark_id: max_bookmark_id
                     })
                     if (result.illusts.length > 0) {
-                        this.bookmarks.push(...result.illusts)
+                        this.bookmarks.push(...result.illusts.filter(illust => illust.visible))
                     }
 
                     max_bookmark_id = undefined
@@ -145,27 +161,34 @@ export default class PixivController extends BaseController {
             }
 
             console.log(`收藏数量 ${this.bookmarks.length}`)
+            if (process.platform.indexOf("win") > -1) {
+                const str = JSON.stringify(this.bookmarks, undefined, 4)
+                fs.writeFileSync("bin/bookmarks.json", str)
+            }
         }
 
-
-
-
-
         if (this.bookmarks) {
-            console.log(`筛选收藏 r18=${r18} type=${type}`)
-            const ret = { illusts: this.filterIllusts(this.bookmarks, r18, type) };
-
+            const ret = { illusts: this.filterIllusts(this.bookmarks, filterDefine) };
             console.log("筛选结果 " + ret.illusts.length)
+
             return ret
         }
 
         return this.bookmarks
     }
 
-    filterIllusts(illusts, r18, type) {
-        r18 = parseInt(r18 ?? 0)
+    /** @param {*} illusts  */
+    /** @param {FilterDefine} filterDefine  */
+    filterIllusts(illusts, filterDefine) {
+        if (!filterDefine) return illusts;
+
+        const r18 = parseInt(filterDefine.r18 ?? 0)
+        const ai = parseInt(filterDefine.ai ?? 0)
         return illusts.filter(illust => {
-            return (illust.x_restrict === r18 || r18 == 2) && (type == undefined || illust.type === type)
+            return (illust.x_restrict === r18 || r18 == 2)
+                && (filterDefine.type == undefined || illust.type === filterDefine.type)
+                && (ai == 0 || illust.illust_ai_type === ai)
+                && (filterDefine.tag == undefined || illust.tags.some(t => t.name === filterDefine.tag || t.translated_name === filterDefine.tag))
         })
     }
 
@@ -173,16 +196,17 @@ export default class PixivController extends BaseController {
     /**
     * @param {Koa.ParameterizedContext<Koa.DefaultState, Koa.DefaultContext, string>} ctx 
     * localhost:8880/pixiv/random?r18=0&type=illust&quality=large
+    * for ($i = 0; $i -lt 10; $i++) { start "http://localhost:8880/pixiv/random?type=illust&quality=large" }
     */
     async random(ctx) {
-        const r18 = ctx.request.query.r18
-        const type = ctx.request.query.type //   ugoira
+        /** 
+        * - large
+        * - medium
+        * - original
+        * - square_medium  
+        */
         const quality = ctx.request.query.quality ?? 'large' //
-        // large
-        // medium
-        // original
-        // square_medium 
-        const result = await this.getBookmark(r18, type);
+        const result = await this.getBookmark(ctx.request.query);
 
         const keys = Object.keys(result.illusts).map(Number);
         for (let i = keys.length - 1; i > 0; i--) {
@@ -203,7 +227,6 @@ export default class PixivController extends BaseController {
             }
         }
         let o = {}
-        Object.entries(detail.illust.meta_single_page).shift()
 
         if (detail) {
             console.log(detail)
@@ -230,7 +253,8 @@ export default class PixivController extends BaseController {
             }
 
             if (uri) {
-                uri.host = 'i.pixiv.ddns-ip.net'
+                uri.host = (await this.app.MyConfig.pixivCdnHost) ?? this.app.MyConfig.pixivCdn[0]
+                console.log("重定向 " + uri)
                 ctx.redirect(uri.toString())
                 return
             }

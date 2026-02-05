@@ -13,7 +13,8 @@ import koaETag from '@koa/etag';
 import koaConditional from 'koa-conditional-get';
 import cacheControl from 'koa-cache-control';
 import * as child_process from 'child_process'
-
+import { KoaWithMyInterface } from './Interfaces/Defines.js'
+import axios, { AxiosError } from 'axios';
 import {
     setTimeout,
     setImmediate,
@@ -28,6 +29,57 @@ const __filename = url.fileURLToPath(import.meta.url).replaceAll('\\', '/')
 const __dirname = path.dirname(__filename).replaceAll('\\', '/')
 // const __filename = import.meta.filename;
 // const __dirname = import.meta.dirname;
+
+/** @type { KoaWithMyInterface } */
+const app = new Koa();
+
+app.MyConfig = {
+    NeedProxyUrl: [
+        /.*\.pixiv\.net$/,
+        /.*\.pximg\.net$/
+    ],
+    RefererMap: [
+        [/.*\.pximg\.net$/, "https://www.pixiv.net/"]
+    ],
+    pixivCdn: ["i.pixiv.ddns-ip.net", "i.yuki.sh", "i.pixiv.re"],
+    proxyUrl: undefined,
+}
+app.MyConfig.pixivCdnHost = new Promise(async (resolve, reject) => {
+    try {
+        var tasks = (await Promise.allSettled(app.MyConfig.pixivCdn.map(url => new Promise(async (resolve1, reject1) => {
+            let start = Date.now()
+            try {
+                const response = await axios.head(`https://${url}`);
+                resolve1([url, Date.now() - start])
+                return
+            } catch (e) {
+                if (e instanceof AxiosError) {
+                    if (typeof (e.status) == "number" && e.status >= 200) {
+                        resolve1([url, Date.now() - start])
+                        return
+                    }
+                }
+                console.log(e)
+
+                reject1(`${url}响应失败${e}`)
+                return
+            }
+        }))))
+        var success = tasks.filter(r => r.status === 'fulfilled').map(r => r.value);
+        var failed = tasks.filter(r => r.status === 'rejected').map(r => r.reason)
+
+        if (success.length > 0) {
+            success.sort((a, b) => a[1] - b[1])
+            console.log(`${success[0][0]}响应最快，${success[0][1]}ms\n${success}`)
+            resolve(success[0][0])
+        }
+    } catch (e) {
+        console.log(e)
+        reject(e)
+        return
+    }
+    reject("ping pixivCDN 失败")
+});
 
 let port = 8880
 process.argv.forEach((val, index) => {
@@ -47,11 +99,8 @@ if (process.platform.indexOf("win") >= 0) {
         encoding: 'ascii'
     })
     if (result.trim().length > 0 && result.indexOf("LISTENING") >= 0)
-        global.proxyUrl = `http://localhost:${proxyPort}`;
+        app.MyConfig.proxyUrl = `http://localhost:${proxyPort}`;
 }
-
-
-const app = new Koa();
 
 /* 大try中间件 */
 app.use(async (ctx, next) => {
@@ -153,7 +202,7 @@ if (process.env['FC_CUSTOM_LISTEN_PORT']) {
     port = parseInt(process.env['FC_CUSTOM_LISTEN_PORT'])
 }
 
-global.myControllers = []
+app.myControllers = []
 
 let isError = false
 for (let localFile of fs.readdirSync(`${__dirname}/controllers`)) {
@@ -163,7 +212,7 @@ for (let localFile of fs.readdirSync(`${__dirname}/controllers`)) {
         const Controller = (await import(localFile)).default;
         if (Controller && typeof Controller === 'function') {
             let obj = new Controller(app, router);
-            global.myControllers.push(obj)
+            app.myControllers.push(obj)
         }
     } catch (error) {
         console.error(`Failed to load controller from file: ${localFile}`, error);

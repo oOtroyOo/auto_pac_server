@@ -154,7 +154,7 @@ export default class IpInfoController extends BaseController {
                     || ipAddress.mask(addr.subnetMask) === addr.mask(addr.subnetMask)
             })) {
             console.log("Find is local IP")
-            if (ip.isV4Format(requestIp)) {
+            if (ip.isV4Format(requestIp) || !this.publicV6) {
                 ipAddress = this.publicV4
             } else {
                 ipAddress = this.publicV6
