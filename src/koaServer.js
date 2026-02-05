@@ -189,7 +189,7 @@ app.myControllers = []
 let isError = false
 for (let localFile of fs.readdirSync(`${__dirname}/controllers`)) {
     try {
-        localFile = `${__dirname}/controllers/${localFile}`
+        localFile = `./controllers/${localFile}`
         console.log(localFile)
         const Controller = (await import(localFile)).default;
         if (Controller && typeof Controller === 'function') {

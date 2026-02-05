@@ -133,7 +133,7 @@ export default class PixivController extends BaseController {
         if (this.bookmarks == undefined) {
             console.log(`请求收藏`)
             this.bookmarks = []
-
+            const notVisible = []
             let max_bookmark_id = undefined
             while (this.bookmarks.length < getLength) {
 
@@ -143,7 +143,13 @@ export default class PixivController extends BaseController {
                         max_bookmark_id: max_bookmark_id
                     })
                     if (result.illusts.length > 0) {
-                        this.bookmarks.push(...result.illusts.filter(illust => illust.visible))
+                        result.illusts.forEach(illust => {
+                            if (illust.visible) {
+                                this.bookmarks.push(illust)
+                            } else {
+                                notVisible.push(illust.id)
+                            }
+                        });
                     }
 
                     max_bookmark_id = undefined
@@ -161,9 +167,10 @@ export default class PixivController extends BaseController {
             }
 
             console.log(`收藏数量 ${this.bookmarks.length}`)
+            console.log(`失效数量 ${notVisible.length}`)
             if (process.platform.indexOf("win") > -1) {
-                const str = JSON.stringify(this.bookmarks, undefined, 4)
-                fs.writeFileSync("bin/bookmarks.json", str)
+                fs.writeFileSync("bin/bookmarks.json", JSON.stringify(this.bookmarks, undefined, 4))
+                fs.writeFileSync("bin/notVisible.json", JSON.stringify(notVisible, undefined, 4))
             }
         }
 
