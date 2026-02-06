@@ -1,6 +1,6 @@
 import url from "url"
 import path from 'path';
-import fs, { glob } from "fs";
+import fs from "fs";
 import Koa from 'koa';
 import koaRouter from 'koa-router';
 import koaSslify from 'koa-sslify'
